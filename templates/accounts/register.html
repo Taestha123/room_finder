@@ -1,67 +1,88 @@
-{% extends 'base.html' %}
-{% block title %}Sign Up — Room Finder{% endblock %}
+{% extends 'accounts/auth_base.html' %}
+{% block title %}Create Account — Room Finder{% endblock %}
 {% block content %}
-<div class="container" style="max-width:480px; padding:60px 16px;">
-  <h1 style="font-size:28px; margin-bottom:8px;">Create your account</h1>
-  <p style="color:var(--color-ink-soft); font-size:14px; margin-bottom:24px;">Join Nepal's verified room rental marketplace.</p>
 
-  {% if form.non_field_errors %}
-    <div style="background:var(--color-brand-light); color:var(--color-brand-dark); padding:10px 14px; border-radius:8px; margin-bottom:16px; font-size:13px;">
-      {{ form.non_field_errors }}
-    </div>
-  {% endif %}
+{% include 'accounts/_auth_side_panel.html' %}
 
-  <form method="post" novalidate>
-    {% csrf_token %}
+<div class="auth-form-panel">
+  <div class="auth-form-inner">
+    <a href="{% url 'core:home' %}" class="back-home">&larr; Back to home</a>
+    <h1 style="font-size:32px; margin-bottom:6px;">Create Account</h1>
+    <p style="color:var(--color-ink-soft); font-size:14px; margin-bottom:20px;">Join Nepal's verified room marketplace</p>
 
-    <div style="display:flex; gap:12px; margin-bottom:14px;">
-      <div style="flex:1;">
-        <label style="font-size:13px; font-weight:500;">First name</label>
-        {{ form.first_name }}
-        {% for error in form.first_name.errors %}<p style="color:var(--color-brand); font-size:12px;">{{ error }}</p>{% endfor %}
+    {% if form.non_field_errors %}
+      <div style="background:var(--color-brand-light); color:var(--color-brand-dark); padding:10px 14px; border-radius:8px; margin-bottom:16px; font-size:13px;">
+        {{ form.non_field_errors }}
       </div>
-      <div style="flex:1;">
-        <label style="font-size:13px; font-weight:500;">Last name</label>
-        {{ form.last_name }}
-        {% for error in form.last_name.errors %}<p style="color:var(--color-brand); font-size:12px;">{{ error }}</p>{% endfor %}
+    {% endif %}
+
+    <form method="post" novalidate>
+      {% csrf_token %}
+
+      <label class="form-label">I am a</label>
+      <div class="role-cards">
+        <label class="role-card {% if form.role.value == 'tenant' or not form.role.value %}selected{% endif %}">
+          <input type="radio" name="role" value="tenant" {% if form.role.value == 'tenant' or not form.role.value %}checked{% endif %}>
+          <div class="role-card-head"><span>&#127968;</span><span>Tenant</span></div>
+          <div class="role-card-sub">Looking for a room</div>
+        </label>
+        <label class="role-card {% if form.role.value == 'landlord' %}selected{% endif %}">
+          <input type="radio" name="role" value="landlord" {% if form.role.value == 'landlord' %}checked{% endif %}>
+          <div class="role-card-head"><span>&#128273;</span><span>Landlord</span></div>
+          <div class="role-card-sub">I have a room to rent</div>
+        </label>
       </div>
-    </div>
 
-    <div style="margin-bottom:14px;">
-      <label style="font-size:13px; font-weight:500;">Email</label>
-      {{ form.email }}
-      {% for error in form.email.errors %}<p style="color:var(--color-brand); font-size:12px;">{{ error }}</p>{% endfor %}
-    </div>
+      <div style="display:flex; gap:12px; margin-bottom:14px;">
+        <div style="flex:1;">
+          <label class="form-label">First Name</label>
+          {{ form.first_name }}
+          {% for error in form.first_name.errors %}<p style="color:var(--color-brand); font-size:12px;">{{ error }}</p>{% endfor %}
+        </div>
+        <div style="flex:1;">
+          <label class="form-label">Last Name</label>
+          {{ form.last_name }}
+          {% for error in form.last_name.errors %}<p style="color:var(--color-brand); font-size:12px;">{{ error }}</p>{% endfor %}
+        </div>
+      </div>
 
-    <div style="margin-bottom:14px;">
-      <label style="font-size:13px; font-weight:500;">Phone number</label>
-      {{ form.phone }}
-      {% for error in form.phone.errors %}<p style="color:var(--color-brand); font-size:12px;">{{ error }}</p>{% endfor %}
-    </div>
+      <div style="margin-bottom:14px;">
+        <label class="form-label">Email Address</label>
+        {{ form.email }}
+        {% for error in form.email.errors %}<p style="color:var(--color-brand); font-size:12px;">{{ error }}</p>{% endfor %}
+      </div>
 
-    <div style="margin-bottom:14px;">
-      <label style="font-size:13px; font-weight:500; display:block; margin-bottom:6px;">I am a...</label>
-      {{ form.role }}
-    </div>
+      <div style="margin-bottom:14px;">
+        <label class="form-label">Phone Number</label>
+        {{ form.phone }}
+        {% for error in form.phone.errors %}<p style="color:var(--color-brand); font-size:12px;">{{ error }}</p>{% endfor %}
+      </div>
 
-    <div style="margin-bottom:14px;">
-      <label style="font-size:13px; font-weight:500;">Password</label>
-      {{ form.password1 }}
-      {% for error in form.password1.errors %}<p style="color:var(--color-brand); font-size:12px;">{{ error }}</p>{% endfor %}
-    </div>
+      <div style="margin-bottom:14px;">
+        <label class="form-label">Password</label>
+        <div class="input-with-icon">
+          {{ form.password1 }}
+          <button type="button" class="toggle-password" data-target="{{ form.password1.id_for_label }}">&#128065;</button>
+        </div>
+        {% for error in form.password1.errors %}<p style="color:var(--color-brand); font-size:12px;">{{ error }}</p>{% endfor %}
+      </div>
 
-    <div style="margin-bottom:20px;">
-      <label style="font-size:13px; font-weight:500;">Confirm password</label>
-      {{ form.password2 }}
-      {% for error in form.password2.errors %}<p style="color:var(--color-brand); font-size:12px;">{{ error }}</p>{% endfor %}
-    </div>
+      <div style="margin-bottom:20px;">
+        <label class="form-label">Confirm Password</label>
+        <div class="input-with-icon">
+          {{ form.password2 }}
+          <button type="button" class="toggle-password" data-target="{{ form.password2.id_for_label }}">&#128065;</button>
+        </div>
+        {% for error in form.password2.errors %}<p style="color:var(--color-brand); font-size:12px;">{{ error }}</p>{% endfor %}
+      </div>
 
-    <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; padding:12px;">Create Account</button>
-  </form>
+      <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; padding:12px;">Create Account &amp; Verify Email</button>
+    </form>
 
-  <p style="text-align:center; font-size:13px; margin-top:20px; color:var(--color-ink-soft);">
-    Already have an account? <a href="{% url 'accounts:login' %}" style="color:var(--color-brand); font-weight:600;">Log in</a>
-  </p>
+    <p style="text-align:center; font-size:13px; margin-top:20px; color:var(--color-ink-soft);">
+      Already registered? <a href="{% url 'accounts:login' %}" style="color:var(--color-brand); font-weight:600;">Sign in</a>
+    </p>
+  </div>
 </div>
 
 <style>
@@ -69,10 +90,25 @@
     width: 100%;
     padding: 10px 12px;
     border: 1px solid var(--color-rule);
-    border-radius: var(--radius-sm);
+    border-radius: 8px;
     font-size: 14px;
-    margin-top: 4px;
   }
   input:focus { outline: 2px solid var(--color-brand); outline-offset: -1px; }
 </style>
+
+<script>
+  document.querySelectorAll('.toggle-password').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var input = document.getElementById(btn.dataset.target);
+      input.type = input.type === 'password' ? 'text' : 'password';
+    });
+  });
+
+  document.querySelectorAll('.role-card').forEach(function (card) {
+    card.addEventListener('click', function () {
+      document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+    });
+  });
+</script>
 {% endblock %}

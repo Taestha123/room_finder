@@ -13,7 +13,7 @@ class RegistrationForm(forms.ModelForm):
         ('tenant', 'Tenant — I want to find a room'),
         ('landlord', 'Landlord — I want to list a room'),
     )
-    role = forms.ChoiceField(choices=ROLE_CHOICES, widget=forms.RadioSelect)
+
 
     class Meta:
         model = User
