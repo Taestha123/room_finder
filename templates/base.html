@@ -1,0 +1,76 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Room Finder — Nepal's Verified Room Rental Marketplace{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/base.css' %}">
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="{% url 'core:home' %}" class="navbar-logo">
+        <div class="navbar-logo-box">R</div>
+        <div>
+          <div class="navbar-logo-text">RoomFinder</div>
+          <div class="navbar-logo-sub">Nepal</div>
+        </div>
+      </a>
+
+      <div class="navbar-links">
+        <a href="{% url 'core:home' %}">Browse Rooms</a>
+        {% if user.is_authenticated and user.role == 'landlord' %}
+          <a href="#">My Listings</a>
+        {% endif %}
+        {% if user.is_authenticated and user.role == 'admin' %}
+          <a href="#">Admin Panel</a>
+        {% endif %}
+      </div>
+
+      <div class="navbar-actions">
+        {% if not user.is_authenticated %}
+          <a href="{% url 'accounts:login' %}" class="btn btn-ghost">Log In</a>
+          <a href="{% url 'accounts:register' %}" class="btn btn-primary">Sign Up Free</a>
+        {% else %}
+          <a href="{% url 'accounts:logout' %}" class="btn btn-ghost">Sign Out</a>
+        {% endif %}
+      </div>
+
+      <button class="navbar-toggle" aria-label="Toggle menu">&#9776;</button>
+    </div>
+
+    <div class="navbar-mobile-menu">
+      <a href="{% url 'core:home' %}">Browse Rooms</a>
+      {% if not user.is_authenticated %}
+        <a href="{% url 'accounts:login' %}">Log In</a>
+        <a href="{% url 'accounts:register' %}" class="btn btn-primary" style="text-align:center;">Sign Up Free</a>
+      {% else %}
+        <a href="{% url 'accounts:logout' %}">Sign Out</a>
+      {% endif %}
+    </div>
+  </nav>
+
+  <main>
+    {% if messages %}
+      <div class="container" style="padding-top:16px;">
+        {% for message in messages %}
+          <p style="font-size:13px; color:var(--color-ink-soft);">{{ message }}</p>
+        {% endfor %}
+      </div>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p style="font-size:13px; opacity:0.7; margin:0;">&copy; {% now "Y" %} Room Finder — Nepal's Verified Room Rental Marketplace</p>
+    </div>
+  </footer>
+
+  <script src="{% static 'js/main.js' %}"></script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

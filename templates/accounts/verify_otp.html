@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}Verify Your Email — Room Finder{% endblock %}
+{% block content %}
+<div class="container" style="max-width:420px; padding:60px 16px; text-align:center;">
+  <h1 style="font-size:26px; margin-bottom:8px;">Verify your email</h1>
+  <p style="color:var(--color-ink-soft); font-size:14px; margin-bottom:24px;">
+    We sent a 6-digit code to <strong>{{ email }}</strong>. It expires in 5 minutes.
+  </p>
+
+  {% if messages %}
+    {% for message in messages %}
+      <div style="background:{% if message.tags == 'success' %}var(--color-leaf-light){% else %}var(--color-brand-light){% endif %};
+                  color:{% if message.tags == 'success' %}var(--color-leaf){% else %}var(--color-brand-dark){% endif %};
+                  padding:10px 14px; border-radius:8px; margin-bottom:16px; font-size:13px;">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endif %}
+
+  <form method="post" id="otp-form">
+    {% csrf_token %}
+    <div class="otp-boxes">
+      <input type="text" maxlength="1" class="otp-box" inputmode="numeric" autofocus>
+      <input type="text" maxlength="1" class="otp-box" inputmode="numeric">
+      <input type="text" maxlength="1" class="otp-box" inputmode="numeric">
+      <input type="text" maxlength="1" class="otp-box" inputmode="numeric">
+      <input type="text" maxlength="1" class="otp-box" inputmode="numeric">
+      <input type="text" maxlength="1" class="otp-box" inputmode="numeric">
+    </div>
+    <input type="hidden" name="otp_code" id="otp_code">
+    <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; padding:12px; margin-top:24px;">Verify</button>
+  </form>
+
+  <form method="post" action="{% url 'accounts:resend_otp' %}" style="margin-top:16px;">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-ghost" style="font-size:13px;">Didn't get a code? Resend</button>
+  </form>
+</div>
+
+<style>
+  .otp-boxes { display: flex; justify-content: center; gap: 10px; }
+  .otp-box {
+    width: 44px; height: 52px; text-align: center; font-size: 22px; font-weight: 600;
+    border: 1.5px solid var(--color-rule); border-radius: var(--radius-sm);
+  }
+  .otp-box:focus { outline: none; border-color: var(--color-brand); }
+</style>
+
+<script>
+  const boxes = document.querySelectorAll('.otp-box');
+  const hiddenInput = document.getElementById('otp_code');
+  const form = document.getElementById('otp-form');
+
+  boxes.forEach((box, index) => {
+    box.addEventListener('input', () => {
+      box.value = box.value.replace(/[^0-9]/g, '');
+      if (box.value && index < boxes.length - 1) {
+        boxes[index + 1].focus();
+      }
+      updateHiddenInput();
+    });
+
+    box.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && !box.value && index > 0) {
+        boxes[index - 1].focus();
+      }
+    });
+  });
+
+  function updateHiddenInput() {
+    hiddenInput.value = Array.from(boxes).map(b => b.value).join('');
+  }
+
+  form.addEventListener('submit', updateHiddenInput);
+</script>
+{% endblock %}
