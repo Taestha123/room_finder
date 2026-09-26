@@ -1,0 +1,147 @@
+{% extends 'base.html' %} {% load static %} {% block title %}My Dashboard — Room
+Finder {% endblock %} {% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}" />
+{% endblock %} {% block content %}
+
+<div class="container dash-header">
+  <div class="dash-header-inner">
+    <div>
+      <div class="dash-eyebrow">Tenant Dashboard</div>
+      <h1 class="dash-title">Welcome back, {{ user.first_name }} &#128075;</h1>
+      <p class="dash-subtitle">
+        Here's what's happening with your room search.
+      </p>
+    </div>
+    <a href="{% url 'core:home' %}" class="btn btn-primary">Browse All Rooms</a>
+  </div>
+</div>
+
+<div class="container dash-section">
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-icon brand">&#10084;</div>
+      <div class="stat-value">0</div>
+      <div class="stat-label">Saved Rooms</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon gold">&#128196;</div>
+      <div class="stat-value">0</div>
+      <div class="stat-label">Applications Sent</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon leaf">&#9993;</div>
+      <div class="stat-value">0</div>
+      <div class="stat-label">Unread Messages</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon saffron">&#128065;</div>
+      <div class="stat-value">0</div>
+      <div class="stat-label">Rooms Viewed</div>
+    </div>
+  </div>
+</div>
+
+<div class="container dash-section">
+  <div class="dash-search">
+    <input
+      type="text"
+      placeholder="Search by area, e.g. Lalitpur, Baneshwor..."
+    />
+    <select>
+      <option>Any budget</option>
+      <option>Under Rs 8,000</option>
+      <option>Rs 8,000 – 15,000</option>
+      <option>Rs 15,000+</option>
+    </select>
+    <select>
+      <option>Any room type</option>
+      <option>Single Room</option>
+      <option>Shared Room</option>
+      <option>Flat</option>
+    </select>
+    <button type="button" class="btn btn-primary">Search</button>
+  </div>
+</div>
+
+<div class="container dash-section">
+  <div class="dash-section-head">
+    <div class="dash-section-title">Recommended for you</div>
+    <a href="{% url 'core:home' %}" class="dash-link">View all &rarr;</a>
+  </div>
+
+  <div class="room-grid">
+    <div class="room-card">
+      <div class="room-card-img">&#127968;</div>
+      <div class="room-card-body">
+        <div class="room-card-title">Cozy Single Room</div>
+        <div class="room-card-loc">Kupondole, Lalitpur</div>
+        <div class="room-card-foot">
+          <span class="room-card-price">Rs 9,500/mo</span>
+          <span class="badge">Verified</span>
+        </div>
+      </div>
+    </div>
+    <div class="room-card">
+      <div class="room-card-img">&#127968;</div>
+      <div class="room-card-body">
+        <div class="room-card-title">2BHK Flat, Near Ring Road</div>
+        <div class="room-card-loc">Baneshwor, Kathmandu</div>
+        <div class="room-card-foot">
+          <span class="room-card-price">Rs 22,000/mo</span>
+          <span class="badge">Verified</span>
+        </div>
+      </div>
+    </div>
+    <div class="room-card">
+      <div class="room-card-img">&#127968;</div>
+      <div class="room-card-body">
+        <div class="room-card-title">Shared Room for Students</div>
+        <div class="room-card-loc">Balkumari, Lalitpur</div>
+        <div class="room-card-foot">
+          <span class="room-card-price">Rs 6,000/mo</span>
+          <span class="badge">Verified</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <p style="font-size: 12px; color: var(--color-muted); margin-top: 10px">
+    Sample listings shown above — will populate automatically once the listings
+    module is connected.
+  </p>
+</div>
+
+<div class="container dash-section" style="padding-bottom: 60px">
+  <div class="dash-layout">
+    <div>
+      <div class="dash-section-head">
+        <div class="dash-section-title">Saved Listings</div>
+      </div>
+      <div class="empty-state">
+        <div class="empty-state-icon">&#10084;</div>
+        <div class="empty-state-title">No saved rooms yet</div>
+        <div class="empty-state-sub">
+          Tap the heart icon on any listing to save it here for later.
+        </div>
+        <a href="{% url 'core:home' %}" class="btn btn-primary">Browse Rooms</a>
+      </div>
+    </div>
+
+    <div class="side-card">
+      <div class="side-card-title">Your Profile</div>
+      <p style="font-size: 13px; color: var(--color-ink-soft); margin: 0 0 4px">
+        {{ user.get_full_name }}
+      </p>
+      <p style="font-size: 13px; color: var(--color-ink-soft); margin: 0 0 4px">
+        {{ user.email }}
+      </p>
+      <p
+        style="font-size: 13px; color: var(--color-ink-soft); margin: 0 0 12px"
+      >
+        {{ user.phone }}
+      </p>
+      <span class="role-pill">{{ user.role }}</span>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

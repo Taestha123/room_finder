@@ -22,11 +22,14 @@
 
       <div class="navbar-links">
         <a href="{% url 'core:home' %}">Browse Rooms</a>
+        {% if user.is_authenticated and user.role == 'tenant' %}
+          <a href="{% url 'core:dashboard' %}">My Dashboard</a>
+        {% endif %}
         {% if user.is_authenticated and user.role == 'landlord' %}
-          <a href="#">My Listings</a>
+          <a href="{% url 'core:dashboard' %}">My Listings</a>
         {% endif %}
         {% if user.is_authenticated and user.role == 'admin' %}
-          <a href="#">Admin Panel</a>
+          <a href="{% url 'core:dashboard' %}">Admin Panel</a>
         {% endif %}
       </div>
 
@@ -35,6 +38,7 @@
           <a href="{% url 'accounts:login' %}" class="btn btn-ghost">Log In</a>
           <a href="{% url 'accounts:register' %}" class="btn btn-primary">Sign Up Free</a>
         {% else %}
+          <a href="{% url 'core:dashboard' %}" class="btn btn-ghost">Dashboard</a>
           <a href="{% url 'accounts:logout' %}" class="btn btn-ghost">Sign Out</a>
         {% endif %}
       </div>
@@ -48,6 +52,7 @@
         <a href="{% url 'accounts:login' %}">Log In</a>
         <a href="{% url 'accounts:register' %}" class="btn btn-primary" style="text-align:center;">Sign Up Free</a>
       {% else %}
+        <a href="{% url 'core:dashboard' %}">Dashboard</a>
         <a href="{% url 'accounts:logout' %}">Sign Out</a>
       {% endif %}
     </div>

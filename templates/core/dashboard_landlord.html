@@ -1,0 +1,123 @@
+{% extends 'base.html' %} {% load static %} {% block title %}My Listings — Room
+Finder{% endblock %} {% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}" />
+{% endblock %} {% block content %}
+
+<div class="container dash-header">
+  <div class="dash-header-inner">
+    <div>
+      <div class="dash-eyebrow">Landlord Dashboard</div>
+      <h1 class="dash-title">Welcome back, {{ user.first_name }} &#128075;</h1>
+      <p class="dash-subtitle">Manage your rooms and track tenant interest.</p>
+    </div>
+    <a href="#" class="btn btn-primary">&#43; Add New Listing</a>
+  </div>
+</div>
+
+<div class="container dash-section">
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-icon brand">&#127968;</div>
+      <div class="stat-value">0</div>
+      <div class="stat-label">Active Listings</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon gold">&#128065;</div>
+      <div class="stat-value">0</div>
+      <div class="stat-label">Total Views</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon leaf">&#128172;</div>
+      <div class="stat-value">0</div>
+      <div class="stat-label">New Inquiries</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon saffron">&#128200;</div>
+      <div class="stat-value">&mdash;</div>
+      <div class="stat-label">Occupancy Rate</div>
+    </div>
+  </div>
+</div>
+
+<div class="container dash-section">
+  <div class="dash-layout">
+    <div>
+      <div class="dash-section-head">
+        <div class="dash-section-title">My Listings</div>
+        <a href="#" class="dash-link">Manage all &rarr;</a>
+      </div>
+
+      <div class="empty-state">
+        <div class="empty-state-icon">&#127968;</div>
+        <div class="empty-state-title">You haven't listed any rooms yet</div>
+        <div class="empty-state-sub">
+          Add your first room to start reaching verified tenants in your area.
+        </div>
+        <a href="#" class="btn btn-primary">&#43; Add New Listing</a>
+      </div>
+
+      <!--
+        Once the listings app has a model + queryset wired in, swap the empty-state
+        above for a table like this:
+
+        <table class="dash-table">
+          <thead>
+            <tr><th>Room</th><th>Location</th><th>Price</th><th>Status</th><th>Views</th></tr>
+          </thead>
+          <tbody>
+            {% for listing in listings %}
+            <tr>
+              <td>{{ listing.title }}</td>
+              <td>{{ listing.location }}</td>
+              <td>Rs {{ listing.price }}</td>
+              <td><span class="badge">{{ listing.status }}</span></td>
+              <td>{{ listing.view_count }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      -->
+    </div>
+
+    <div>
+      <div class="dash-section-head">
+        <div class="dash-section-title">Recent Inquiries</div>
+      </div>
+      <div class="side-card">
+        <div class="empty-state" style="border: none; padding: 20px 8px">
+          <div class="empty-state-icon">&#128172;</div>
+          <div class="empty-state-title">No inquiries yet</div>
+          <div class="empty-state-sub">
+            Tenant messages about your rooms will show up here.
+          </div>
+        </div>
+      </div>
+
+      <div class="side-card" style="margin-top: 16px">
+        <div class="side-card-title">Your Profile</div>
+        <p
+          style="font-size: 13px; color: var(--color-ink-soft); margin: 0 0 4px"
+        >
+          {{ user.get_full_name }}
+        </p>
+        <p
+          style="font-size: 13px; color: var(--color-ink-soft); margin: 0 0 4px"
+        >
+          {{ user.email }}
+        </p>
+        <p
+          style="
+            font-size: 13px;
+            color: var(--color-ink-soft);
+            margin: 0 0 12px;
+          "
+        >
+          {{ user.phone }}
+        </p>
+        <span class="role-pill">{{ user.role }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

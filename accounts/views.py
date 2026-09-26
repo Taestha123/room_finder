@@ -65,7 +65,7 @@ def verify_otp(request):
             del request.session['pending_user_id']
             login(request, user)
             messages.success(request, 'Your account has been verified!')
-            return redirect('core:home')
+            return redirect('core:dashboard')
 
     return render(request, 'accounts/verify_otp.html', {'email': user.email})
 
@@ -85,7 +85,7 @@ def login_view(request):
         form = EmailLoginForm(request, data=request.POST)
         if form.is_valid():
             login(request, form.get_user())
-            return redirect('core:home')
+            return redirect('core:dashboard')
     else:
         form = EmailLoginForm()
 

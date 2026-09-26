@@ -1,0 +1,46 @@
+{% extends 'base.html' %} {% load static %} {% block title %}Admin Panel — Room
+Finder{% endblock %} {% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}" />
+{% endblock %} {% block content %}
+
+<div class="container dash-header">
+  <div class="dash-header-inner">
+    <div>
+      <div class="dash-eyebrow">Admin Panel</div>
+      <h1 class="dash-title">Welcome back, {{ user.first_name }}</h1>
+      <p class="dash-subtitle">Platform-wide overview and moderation tools.</p>
+    </div>
+    <a href="/admin/" class="btn btn-primary">Open Django Admin</a>
+  </div>
+</div>
+
+<div class="container dash-section" style="padding-bottom: 60px">
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="stat-icon brand">&#128101;</div>
+      <div class="stat-value">&mdash;</div>
+      <div class="stat-label">Total Users</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon gold">&#127968;</div>
+      <div class="stat-value">&mdash;</div>
+      <div class="stat-label">Total Listings</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon leaf">&#9989;</div>
+      <div class="stat-value">&mdash;</div>
+      <div class="stat-label">Verified Landlords</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon saffron">&#9888;</div>
+      <div class="stat-value">&mdash;</div>
+      <div class="stat-label">Reported Listings</div>
+    </div>
+  </div>
+  <p style="font-size: 12px; color: var(--color-muted); margin-top: 16px">
+    Wire these stat cards up to real querysets once the listings/reports models
+    exist.
+  </p>
+</div>
+
+{% endblock %}

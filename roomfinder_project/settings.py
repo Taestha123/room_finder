@@ -136,6 +136,6 @@ MAILERS = {
 }
 
 LOGIN_URL = 'accounts:login'
-LOGIN_REDIRECT_URL = 'core:home'
+LOGIN_REDIRECT_URL = 'core:dashboard'
 LOGOUT_REDIRECT_URL = 'core:home'
 DEFAULT_FROM_EMAIL = 'noreply@roomfinder.local'
