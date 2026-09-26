@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}All Listings — Admin Panel{% endblock %}
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/admin-dashboard.css' %}">
+{% endblock %}
+{% block content %}
+
+<div class="admin-layout">
+
+  {% include 'core/_admin_sidebar.html' %}
+
+  <main class="admin-content">
+
+    <div class="overview-grid">
+      <div class="overview-card">
+        <div class="overview-number">{{ total_listings }}</div>
+        <div class="overview-label">Total Listings</div>
+      </div>
+      <div class="overview-card tone-green">
+        <div class="overview-number">{{ approved_listings }}</div>
+        <div class="overview-label">Approved</div>
+      </div>
+      <div class="overview-card tone-tan">
+        <div class="overview-number">{{ pending_listings_count }}</div>
+        <div class="overview-label">Pending</div>
+      </div>
+      <div class="overview-card tone-pink">
+        <div class="overview-number">{{ total_users }}</div>
+        <div class="overview-label">Total Users</div>
+      </div>
+    </div>
+
+    <h2 class="admin-section-title">All Listings</h2>
+
+    {% if listings %}
+      <div class="listings-table-wrap">
+        <table class="listings-table">
+          <thead>
+            <tr>
+              <th>Listing</th>
+              <th>Owner</th>
+              <th>Location</th>
+              <th>Rent</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for listing in listings %}
+              <tr>
+                <td>
+                  <div class="listing-cell">
+                    <div class="listing-thumb">&#127968;</div>
+                    <div>
+                      <div class="listing-name">{{ listing.title }}</div>
+                      <div class="listing-type">{{ listing.room_type }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td>{{ listing.owner }}</td>
+                <td>{{ listing.location }}</td>
+                <td class="listing-rent">{{ listing.rent }}</td>
+                <td>
+                  {% if listing.status == 'approved' %}
+                    <span class="status-pill status-approved">Approved</span>
+                  {% else %}
+                    <span class="status-pill status-pending">Pending</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <div class="listing-actions">
+                    <button type="button" class="btn-view">View</button>
+                    <button type="button" class="btn-remove">Remove</button>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="admin-empty">No listings yet.</div>
+    {% endif %}
+
+  </main>
+</div>
+
+{% endblock %}

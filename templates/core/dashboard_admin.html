@@ -8,40 +8,7 @@
 
 <div class="admin-layout">
 
-  <aside class="admin-sidebar">
-    <div class="admin-sidebar-head">
-      <div class="admin-eyebrow">Admin Panel</div>
-      <div class="admin-sidebar-title">RoomFinder Nepal</div>
-    </div>
-
-    <nav class="admin-nav">
-      <a href="{% url 'core:dashboard' %}" class="admin-nav-item active">
-        <span class="admin-nav-icon">&#9203;</span>
-        <span class="admin-nav-label">Pending Reviews</span>
-        {% if pending_listings_count %}
-          <span class="admin-nav-badge">{{ pending_listings_count }}</span>
-        {% endif %}
-      </a>
-      <a href="#" class="admin-nav-item">
-        <span class="admin-nav-icon">&#127968;</span>
-        <span class="admin-nav-label">All Listings</span>
-      </a>
-      <a href="#" class="admin-nav-item">
-        <span class="admin-nav-icon">&#128101;</span>
-        <span class="admin-nav-label">Users</span>
-      </a>
-      <a href="#" class="admin-nav-item">
-        <span class="admin-nav-icon">&#128202;</span>
-        <span class="admin-nav-label">Analytics</span>
-      </a>
-      <a href="#" class="admin-nav-item">
-        <span class="admin-nav-icon">&#128188;</span>
-        <span class="admin-nav-label">Advertisements</span>
-      </a>
-    </nav>
-
-    <div class="admin-sidebar-foot">Admin &middot; v1.0.0</div>
-  </aside>
+  {% include 'core/_admin_sidebar.html' %}
 
   <main class="admin-content">
 

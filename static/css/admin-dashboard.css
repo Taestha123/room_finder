@@ -235,6 +235,89 @@
   color: var(--color-ink-soft);
 }
 
+/* All Listings table */
+.listings-table-wrap {
+  background: #fff;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+}
+.listings-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 760px;
+}
+.listings-table th {
+  text-align: left;
+  padding: 14px 20px;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  background: var(--color-cream);
+  border-bottom: 1px solid var(--color-rule);
+  white-space: nowrap;
+}
+.listings-table td {
+  padding: 14px 20px;
+  font-size: 14px;
+  color: var(--color-ink);
+  border-bottom: 1px solid var(--color-rule);
+  vertical-align: middle;
+}
+.listings-table tr:last-child td { border-bottom: none; }
+.listings-table tr:hover td { background: var(--color-cream); }
+
+.listing-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.listing-thumb {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--color-cream-dark), var(--color-rule));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: var(--color-muted);
+}
+.listing-name { font-weight: 600; font-size: 14px; }
+.listing-type { font-size: 12px; color: var(--color-muted); margin-top: 2px; }
+.listing-rent { font-weight: 700; color: var(--color-brand); white-space: nowrap; }
+
+.status-pill {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.status-pill.status-approved { background: var(--color-leaf-light); color: var(--color-leaf); }
+.status-pill.status-pending  { background: #FBEEDD; color: var(--color-saffron); }
+
+.listing-actions {
+  display: flex;
+  gap: 8px;
+  white-space: nowrap;
+}
+.btn-view, .btn-remove {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: 1.5px solid var(--color-rule);
+  background: #fff;
+  color: var(--color-ink);
+}
+.btn-view:hover { border-color: var(--color-ink); }
+.btn-remove { color: var(--color-brand); border-color: var(--color-brand-light); }
+.btn-remove:hover { background: var(--color-brand-light); }
+
 @media (max-width: 960px) {
   .admin-layout { flex-direction: column; }
   .admin-sidebar { width: 100%; flex-direction: row; overflow-x: auto; }
@@ -243,4 +326,7 @@
   .overview-grid { grid-template-columns: repeat(2, 1fr); }
   .review-card { flex-direction: column; }
   .review-card-img { width: 100%; }
+}
+@media (max-width: 560px) {
+  .listings-table { min-width: 640px; }
 }
