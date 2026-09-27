@@ -1,7 +1,11 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block content %}
 <div class="container" style="padding-top:60px; padding-bottom:60px;">
   <h1 style="font-size:32px;">Welcome to Room Finder</h1>
   <p style="color:var(--color-ink-soft);">This is Day 1 — base template and navbar are live.</p>
+
+  <img src="{% static 'img/auth-bg.jpg' %}" alt="Room Finder" style="max-width:100%; border-radius:8px; margin-top:24px;">
+
 </div>
 {% endblock %}
