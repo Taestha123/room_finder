@@ -16,15 +16,15 @@
       <span class="admin-nav-icon">&#127968;</span>
       <span class="admin-nav-label">All Listings</span>
     </a>
-    <a href="#" class="admin-nav-item {% if active_page == 'users' %}active{% endif %}">
+    <a href="{% url 'core:admin_users' %}" class="admin-nav-item {% if active_page == 'users' %}active{% endif %}">
       <span class="admin-nav-icon">&#128101;</span>
       <span class="admin-nav-label">Users</span>
     </a>
-    <a href="#" class="admin-nav-item {% if active_page == 'analytics' %}active{% endif %}">
+    <a href="{% url 'core:admin_analytics' %}" class="admin-nav-item {% if active_page == 'analytics' %}active{% endif %}">
       <span class="admin-nav-icon">&#128202;</span>
       <span class="admin-nav-label">Analytics</span>
     </a>
-    <a href="#" class="admin-nav-item {% if active_page == 'ads' %}active{% endif %}">
+    <a href="{% url 'core:admin_advertisements' %}" class="admin-nav-item {% if active_page == 'ads' %}active{% endif %}">
       <span class="admin-nav-icon">&#128188;</span>
       <span class="admin-nav-label">Advertisements</span>
     </a>

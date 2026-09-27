@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Advertisement Management — Admin Panel{% endblock %}
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/admin-dashboard.css' %}">
+{% endblock %}
+{% block content %}
+
+<div class="admin-layout">
+
+  {% include 'core/_admin_sidebar.html' %}
+
+  <main class="admin-content">
+
+    <div class="overview-grid">
+      <div class="overview-card">
+        <div class="overview-number">{{ total_listings }}</div>
+        <div class="overview-label">Total Listings</div>
+      </div>
+      <div class="overview-card tone-green">
+        <div class="overview-number">{{ approved_listings }}</div>
+        <div class="overview-label">Approved</div>
+      </div>
+      <div class="overview-card tone-tan">
+        <div class="overview-number">{{ pending_listings_count }}</div>
+        <div class="overview-label">Pending</div>
+      </div>
+      <div class="overview-card tone-pink">
+        <div class="overview-number">{{ total_users }}</div>
+        <div class="overview-label">Total Users</div>
+      </div>
+    </div>
+
+    <h2 class="admin-section-title">Advertisement Management</h2>
+
+    {% if ads %}
+      <div class="ads-grid">
+        {% for ad in ads %}
+          <div class="ad-card">
+            <div class="ad-card-head">
+              <div class="ad-card-title">{{ ad.title }}</div>
+              <span class="status-pill status-approved">{{ ad.status }}</span>
+            </div>
+
+            <div class="ad-card-row">
+              <span class="ad-card-label">Type</span>
+              <span class="ad-card-value">{{ ad.ad_type }}</span>
+            </div>
+            <div class="ad-card-row">
+              <span class="ad-card-label">Size</span>
+              <span class="ad-card-value">{{ ad.size }}</span>
+            </div>
+            <div class="ad-card-row">
+              <span class="ad-card-label">Est. Revenue</span>
+              <span class="ad-card-value ad-card-revenue">{{ ad.revenue }}</span>
+            </div>
+
+            <div class="ad-card-actions">
+              <button type="button" class="btn-configure">Configure</button>
+              <button type="button" class="btn-view-report">View Report</button>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="admin-empty">No ad placements set up yet.</div>
+    {% endif %}
+
+  </main>
+</div>
+
+{% endblock %}

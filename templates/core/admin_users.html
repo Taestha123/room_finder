@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}User Management — Admin Panel{% endblock %}
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/admin-dashboard.css' %}">
+{% endblock %}
+{% block content %}
+
+<div class="admin-layout">
+
+  {% include 'core/_admin_sidebar.html' %}
+
+  <main class="admin-content">
+
+    <div class="overview-grid">
+      <div class="overview-card">
+        <div class="overview-number">{{ total_listings }}</div>
+        <div class="overview-label">Total Listings</div>
+      </div>
+      <div class="overview-card tone-green">
+        <div class="overview-number">{{ approved_listings }}</div>
+        <div class="overview-label">Approved</div>
+      </div>
+      <div class="overview-card tone-tan">
+        <div class="overview-number">{{ pending_listings_count }}</div>
+        <div class="overview-label">Pending</div>
+      </div>
+      <div class="overview-card tone-pink">
+        <div class="overview-number">{{ total_users }}</div>
+        <div class="overview-label">Total Users</div>
+      </div>
+    </div>
+
+    <h2 class="admin-section-title">User Management</h2>
+
+    {% if users_list %}
+      <div class="listings-table-wrap">
+        <table class="listings-table">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Role</th>
+              <th>Joined</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for u in users_list %}
+              <tr>
+                <td>
+                  <div class="listing-cell">
+                    <div class="user-avatar">{{ u.first_name|first|upper }}</div>
+                    <div class="listing-name">{{ u.get_full_name }}</div>
+                  </div>
+                </td>
+                <td>{{ u.email }}</td>
+                <td>{{ u.phone }}</td>
+                <td>{{ u.get_role_display }}</td>
+                <td>{{ u.date_joined|date:"Y-m-d" }}</td>
+                <td>
+                  {% if u.is_active %}
+                    <span class="status-pill status-approved">Active</span>
+                  {% else %}
+                    <span class="status-pill status-suspended">Suspended</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if u.id == user.id %}
+                    <span class="listing-type">You</span>
+                  {% else %}
+                    <form method="post" action="{% url 'core:admin_toggle_user_status' u.id %}">
+                      {% csrf_token %}
+                      {% if u.is_active %}
+                        <button type="submit" class="btn-remove">Suspend</button>
+                      {% else %}
+                        <button type="submit" class="btn-restore">Restore</button>
+                      {% endif %}
+                    </form>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="admin-empty">No registered users yet.</div>
+    {% endif %}
+
+  </main>
+</div>
+
+{% endblock %}

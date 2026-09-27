@@ -1,7 +1,9 @@
 from functools import wraps
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.views.decorators.http import require_POST
 
 from accounts.models import User
 
@@ -82,6 +84,33 @@ MOCK_ALL_LISTINGS = [
     {'title': '2-Room Set in Butwal City Center', 'room_type': '2 Rooms',
      'owner': 'Kamala Poudel', 'location': 'Rupandehi', 'rent': 'NPR 11,000', 'status': 'approved'},
 ]
+
+MOCK_METRICS = [
+    {'label': 'TOTAL REVENUE (EST.)', 'value': 'NPR 1,24,500', 'delta': '+12% vs last month', 'positive': True},
+    {'label': 'AD IMPRESSIONS', 'value': '48,320', 'delta': '+8% vs last month', 'positive': True},
+    {'label': 'PHONE REVEALS', 'value': '1,247', 'delta': '-3% vs last month', 'positive': False},
+]
+
+MOCK_PROVINCE_COUNTS = [
+    ('Bagmati', 68),
+    ('Gandaki', 22),
+    ('Lumbini', 15),
+    ('Koshi', 12),
+    ('Madhesh', 8),
+    ('Sudurpashchim', 5),
+    ('Karnali', 3),
+]
+
+MOCK_ADS = [
+    {'title': 'Homepage Top Banner', 'status': 'Active',
+     'ad_type': 'Display / Banner', 'size': '728\u00d790', 'revenue': 'NPR 18,200'},
+    {'title': 'Between Listing Cards', 'status': 'Active',
+     'ad_type': 'Banner Ad', 'size': '336\u00d7280', 'revenue': 'NPR 24,100'},
+    {'title': 'Room Detail \u2014 Below Images', 'status': 'Active',
+     'ad_type': 'Banner Ad', 'size': '728\u00d790', 'revenue': 'NPR 12,600'},
+    {'title': 'Phone Reveal (Rewarded)', 'status': 'Active',
+     'ad_type': 'Rewarded Ad', 'size': 'Full Screen', 'revenue': 'NPR 69,600'},
+]
 # ---------------------------------------------------------------------------
 
 
@@ -119,3 +148,66 @@ def admin_listings(request):
         'listings': MOCK_ALL_LISTINGS,
     })
     return render(request, 'core/admin_listings.html', context)
+
+
+@admin_required
+def admin_users(request):
+    """
+    Real data — every registered user, newest first.
+    """
+    context = _admin_overview_stats()
+    context.update({
+        'user': request.user,
+        'active_page': 'users',
+        'users_list': User.objects.all().order_by('-date_joined'),
+    })
+    return render(request, 'core/admin_users.html', context)
+
+
+@admin_required
+def admin_analytics(request):
+    context = _admin_overview_stats()
+
+    max_count = max(count for _, count in MOCK_PROVINCE_COUNTS)
+    provinces = [
+        {'name': name, 'count': count, 'pct': round(count / max_count * 100)}
+        for name, count in MOCK_PROVINCE_COUNTS
+    ]
+
+    context.update({
+        'user': request.user,
+        'active_page': 'analytics',
+        'metrics': MOCK_METRICS,
+        'provinces': provinces,
+    })
+    return render(request, 'core/admin_analytics.html', context)
+
+
+@admin_required
+def admin_advertisements(request):
+    context = _admin_overview_stats()
+    context.update({
+        'user': request.user,
+        'active_page': 'ads',
+        'ads': MOCK_ADS,
+    })
+    return render(request, 'core/admin_advertisements.html', context)
+
+
+@admin_required
+@require_POST
+def admin_toggle_user_status(request, user_id):
+    """
+    Flips a user's is_active flag — this is the real Suspend/Restore action.
+    """
+    target = get_object_or_404(User, id=user_id)
+
+    if target.id == request.user.id:
+        messages.error(request, "You can't suspend your own account.")
+    else:
+        target.is_active = not target.is_active
+        target.save(update_fields=['is_active'])
+        action = 'restored' if target.is_active else 'suspended'
+        messages.success(request, f"{target.get_full_name()} has been {action}.")
+
+    return redirect('core:admin_users')

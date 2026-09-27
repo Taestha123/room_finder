@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Platform Analytics — Admin Panel{% endblock %}
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/admin-dashboard.css' %}">
+{% endblock %}
+{% block content %}
+
+<div class="admin-layout">
+
+  {% include 'core/_admin_sidebar.html' %}
+
+  <main class="admin-content">
+
+    <div class="overview-grid">
+      <div class="overview-card">
+        <div class="overview-number">{{ total_listings }}</div>
+        <div class="overview-label">Total Listings</div>
+      </div>
+      <div class="overview-card tone-green">
+        <div class="overview-number">{{ approved_listings }}</div>
+        <div class="overview-label">Approved</div>
+      </div>
+      <div class="overview-card tone-tan">
+        <div class="overview-number">{{ pending_listings_count }}</div>
+        <div class="overview-label">Pending</div>
+      </div>
+      <div class="overview-card tone-pink">
+        <div class="overview-number">{{ total_users }}</div>
+        <div class="overview-label">Total Users</div>
+      </div>
+    </div>
+
+    <h2 class="admin-section-title">Platform Analytics</h2>
+
+    <div class="metric-grid">
+      {% for m in metrics %}
+        <div class="metric-card">
+          <div class="metric-label">{{ m.label }}</div>
+          <div class="metric-value">{{ m.value }}</div>
+          <div class="metric-delta {% if m.positive %}delta-up{% else %}delta-down{% endif %}">
+            {{ m.delta }}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="province-panel">
+      <h3 class="province-panel-title">Listings by Province</h3>
+      {% for p in provinces %}
+        <div class="province-row">
+          <div class="province-name">{{ p.name }}</div>
+          <div class="province-bar-track">
+            <div class="province-bar-fill" style="width: {{ p.pct }}%;"></div>
+          </div>
+          <div class="province-count">{{ p.count }}</div>
+        </div>
+      {% endfor %}
+    </div>
+
+  </main>
+</div>
+
+{% endblock %}
