@@ -39,12 +39,16 @@
           <div class="ad-card">
             <div class="ad-card-head">
               <div class="ad-card-title">{{ ad.title }}</div>
-              <span class="status-pill status-approved">{{ ad.status }}</span>
+              {% if ad.is_active %}
+                <span class="status-pill status-approved">Active</span>
+              {% else %}
+                <span class="status-pill status-suspended">Inactive</span>
+              {% endif %}
             </div>
 
             <div class="ad-card-row">
               <span class="ad-card-label">Type</span>
-              <span class="ad-card-value">{{ ad.ad_type }}</span>
+              <span class="ad-card-value">{{ ad.get_ad_type_display }}</span>
             </div>
             <div class="ad-card-row">
               <span class="ad-card-label">Size</span>
@@ -52,12 +56,12 @@
             </div>
             <div class="ad-card-row">
               <span class="ad-card-label">Est. Revenue</span>
-              <span class="ad-card-value ad-card-revenue">{{ ad.revenue }}</span>
+              <span class="ad-card-value ad-card-revenue">NPR {{ ad.est_revenue }}</span>
             </div>
 
             <div class="ad-card-actions">
-              <button type="button" class="btn-configure">Configure</button>
-              <button type="button" class="btn-view-report">View Report</button>
+              <a href="{% url 'core:admin_ad_configure' ad.id %}" class="btn-configure">Configure</a>
+              <a href="{% url 'core:admin_ad_report' ad.id %}" class="btn-view-report">View Report</a>
             </div>
           </div>
         {% endfor %}

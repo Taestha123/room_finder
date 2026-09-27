@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ ad.title }} Report — Admin Panel{% endblock %}
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/admin-dashboard.css' %}">
+{% endblock %}
+{% block content %}
+
+<div class="admin-layout">
+
+  {% include 'core/_admin_sidebar.html' %}
+
+  <main class="admin-content">
+
+    <a href="{% url 'core:admin_advertisements' %}" class="dash-link">&larr; Back to Advertisements</a>
+
+    <div class="ad-card" style="max-width:480px; margin-top:16px;">
+      <div class="ad-card-head">
+        <div class="ad-card-title">{{ ad.title }}</div>
+        {% if ad.is_active %}
+          <span class="status-pill status-approved">Active</span>
+        {% else %}
+          <span class="status-pill status-suspended">Inactive</span>
+        {% endif %}
+      </div>
+
+      <div class="ad-card-row">
+        <span class="ad-card-label">Type</span>
+        <span class="ad-card-value">{{ ad.get_ad_type_display }}</span>
+      </div>
+      <div class="ad-card-row">
+        <span class="ad-card-label">Size</span>
+        <span class="ad-card-value">{{ ad.size }}</span>
+      </div>
+      <div class="ad-card-row">
+        <span class="ad-card-label">Est. Monthly Revenue</span>
+        <span class="ad-card-value ad-card-revenue">NPR {{ ad.est_revenue }}</span>
+      </div>
+
+      <p class="listing-type" style="margin-top:16px;">
+        This is an estimate based on the configured revenue figure above — there's no
+        real ad-serving or click-tracking wired up yet, so there's no impressions/clicks
+        breakdown to show here until that's built.
+      </p>
+    </div>
+
+  </main>
+</div>
+
+{% endblock %}

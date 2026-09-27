@@ -480,6 +480,12 @@
   .metric-grid { grid-template-columns: 1fr; }
   .ads-grid { grid-template-columns: 1fr; }
 }
+.dash-link {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-brand);
+}
+.dash-link:hover { color: var(--color-brand-dark); }
 @media (max-width: 560px) {
   .listings-table { min-width: 640px; }
   .province-row { grid-template-columns: 90px 1fr 32px; gap: 10px; }

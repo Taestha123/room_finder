@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Configure {{ ad.title }} — Admin Panel{% endblock %}
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/admin-dashboard.css' %}">
+{% endblock %}
+{% block content %}
+
+<div class="admin-layout">
+
+  {% include 'core/_admin_sidebar.html' %}
+
+  <main class="admin-content">
+
+    <a href="{% url 'core:admin_advertisements' %}" class="dash-link">&larr; Back to Advertisements</a>
+
+    <div class="ad-card" style="max-width:480px; margin-top:16px;">
+      <div class="ad-card-head">
+        <div class="ad-card-title">Configure Placement</div>
+      </div>
+
+      <form method="post">
+        {% csrf_token %}
+
+        <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">Title</label>
+        <input type="text" name="title" value="{{ ad.title }}" required
+               style="width:100%; padding:10px; border:1.5px solid var(--color-rule); border-radius:8px; margin-bottom:16px;">
+
+        <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">Size</label>
+        <input type="text" name="size" value="{{ ad.size }}" required
+               style="width:100%; padding:10px; border:1.5px solid var(--color-rule); border-radius:8px; margin-bottom:16px;">
+
+        <label style="display:block; font-size:13px; font-weight:600; margin-bottom:6px;">Estimated Monthly Revenue (NPR)</label>
+        <input type="number" name="est_revenue" value="{{ ad.est_revenue }}" min="0" required
+               style="width:100%; padding:10px; border:1.5px solid var(--color-rule); border-radius:8px; margin-bottom:16px;">
+
+        <label style="display:flex; align-items:center; gap:8px; font-size:14px; margin-bottom:20px;">
+          <input type="checkbox" name="is_active" {% if ad.is_active %}checked{% endif %}>
+          Placement is active
+        </label>
+
+        <button type="submit" class="btn-view-report" style="width:100%;">Save Changes</button>
+      </form>
+    </div>
+
+  </main>
+</div>
+
+{% endblock %}

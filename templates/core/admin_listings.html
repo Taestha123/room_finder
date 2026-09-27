@@ -54,24 +54,30 @@
                     <div class="listing-thumb">&#127968;</div>
                     <div>
                       <div class="listing-name">{{ listing.title }}</div>
-                      <div class="listing-type">{{ listing.room_type }}</div>
+                      <div class="listing-type">{{ listing.get_room_type_display }}</div>
                     </div>
                   </div>
                 </td>
-                <td>{{ listing.owner }}</td>
+                <td>{{ listing.owner.get_full_name }}</td>
                 <td>{{ listing.location }}</td>
-                <td class="listing-rent">{{ listing.rent }}</td>
+                <td class="listing-rent">NPR {{ listing.price }}</td>
                 <td>
                   {% if listing.status == 'approved' %}
                     <span class="status-pill status-approved">Approved</span>
+                  {% elif listing.status == 'rejected' %}
+                    <span class="status-pill status-suspended">Rejected</span>
                   {% else %}
                     <span class="status-pill status-pending">Pending</span>
                   {% endif %}
                 </td>
                 <td>
                   <div class="listing-actions">
-                    <button type="button" class="btn-view">View</button>
-                    <button type="button" class="btn-remove">Remove</button>
+                    <a href="{% url 'core:admin_listing_detail' listing.id %}" class="btn-view">View</a>
+                    <form method="post" action="{% url 'core:admin_remove_listing' listing.id %}"
+                          onsubmit="return confirm('Permanently remove {{ listing.title|escapejs }}?');">
+                      {% csrf_token %}
+                      <button type="submit" class="btn-remove">Remove</button>
+                    </form>
                   </div>
                 </td>
               </tr>

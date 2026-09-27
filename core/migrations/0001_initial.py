@@ -1,0 +1,26 @@
+from django.db import migrations, models
+
+
+class Migration(migrations.Migration):
+
+    initial = True
+
+    dependencies = [
+    ]
+
+    operations = [
+        migrations.CreateModel(
+            name='Advertisement',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('title', models.CharField(max_length=120)),
+                ('ad_type', models.CharField(choices=[('display_banner', 'Display / Banner'), ('banner', 'Banner Ad'), ('rewarded', 'Rewarded Ad')], default='banner', max_length=20)),
+                ('size', models.CharField(help_text='e.g. 728x90, 336x280, Full Screen', max_length=40)),
+                ('est_revenue', models.PositiveIntegerField(default=0, help_text='Estimated monthly revenue in NPR')),
+                ('is_active', models.BooleanField(default=True)),
+            ],
+            options={
+                'ordering': ['id'],
+            },
+        ),
+    ]

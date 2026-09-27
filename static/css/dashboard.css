@@ -46,7 +46,6 @@
 }
 .dash-link:hover { color: var(--color-brand-dark); }
 
-/* Stat cards */
 .stat-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -84,7 +83,6 @@
   margin-top: 4px;
 }
 
-/* Search bar (tenant) */
 .dash-search {
   display: flex;
   gap: 10px;
@@ -109,7 +107,6 @@
   color: var(--color-ink-soft);
 }
 
-/* Room / listing cards */
 .room-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -150,7 +147,6 @@
   color: var(--color-leaf);
 }
 
-/* Empty state */
 .empty-state {
   background: #fff;
   border: 1.5px dashed var(--color-rule);
@@ -162,7 +158,6 @@
 .empty-state-title { font-weight: 600; margin-bottom: 4px; }
 .empty-state-sub { font-size: 13px; color: var(--color-ink-soft); margin-bottom: 18px; }
 
-/* Table (landlord listings / inquiries) */
 .dash-table {
   width: 100%;
   border-collapse: collapse;

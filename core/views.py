@@ -1,11 +1,12 @@
-from functools import wraps
-
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
+from functools import wraps
 
 from accounts.models import User
+from listings.models import Listing
+from listings.models import Advertisement
 
 
 def home(request):
@@ -26,92 +27,14 @@ def admin_required(view_func):
     return _wrapped
 
 
-# ---------------------------------------------------------------------------
-# MOCK DATA matching the Figma admin panel design.
-# Once listings.models has a real Listing model, delete everything in this
-# section and replace it with real querysets, e.g.:
-#   total_listings      = Listing.objects.count()
-#   approved_listings   = Listing.objects.filter(status='approved').count()
-#   pending_qs          = Listing.objects.filter(status='pending')
-#   pending_listings_count = pending_qs.count()
-# ---------------------------------------------------------------------------
-
 def _admin_overview_stats():
+    """Real counts, pulled straight from the database."""
     return {
-        'total_listings': 8,
-        'approved_listings': 7,
-        'pending_listings_count': 1,
+        'total_listings': Listing.objects.count(),
+        'approved_listings': Listing.objects.filter(status='approved').count(),
+        'pending_listings_count': Listing.objects.filter(status='pending').count(),
         'total_users': User.objects.count(),
     }
-
-
-MOCK_PENDING_LISTINGS = [
-    {
-        'title': 'Budget Room Near Tribhuvan University',
-        'location': 'Nayabazar, Kathmandu, Bagmati',
-        'description': (
-            "Budget-friendly room ideal for TU students. 5-minute walk "
-            "from campus. Common kitchen available. Safe and secure "
-            "building with 24-hour gate access. Ideal for focused study "
-            "with a quiet environment."
-        ),
-        'owner': 'Bijay Thapa',
-        'price': 'NPR 6,500/mo',
-        'room_type': 'Single Room',
-        'submitted': '1 month ago',
-        'documents': [
-            {'label': 'Citizenship Front', 'status': 'Pending'},
-            {'label': 'Citizenship Back', 'status': 'Pending'},
-            {'label': 'Lalpurja', 'status': 'Pending'},
-            {'label': 'Selfie', 'status': 'Pending'},
-        ],
-    },
-]
-
-MOCK_ALL_LISTINGS = [
-    {'title': 'Modern 2BHK Flat in Lazimpat', 'room_type': 'Flat',
-     'owner': 'Rajesh Sharma', 'location': 'Kathmandu', 'rent': 'NPR 28,000', 'status': 'approved'},
-    {'title': 'Furnished Single Room near Patan Durbar', 'room_type': 'Single Room',
-     'owner': 'Sunita Maharjan', 'location': 'Lalitpur', 'rent': 'NPR 9,000', 'status': 'approved'},
-    {'title': 'Budget Room Near Tribhuvan University', 'room_type': 'Single Room',
-     'owner': 'Bijay Thapa', 'location': 'Kathmandu', 'rent': 'NPR 6,500', 'status': 'pending'},
-    {'title': 'Luxury 3BHK Apartment in Pulchowk', 'room_type': 'Apartment',
-     'owner': 'Anil Gurung', 'location': 'Lalitpur', 'rent': 'NPR 45,000', 'status': 'approved'},
-    {'title': 'Hostel Accommodation in Thamel', 'room_type': 'Hostel',
-     'owner': 'Priya Shrestha', 'location': 'Kathmandu', 'rent': 'NPR 7,000', 'status': 'approved'},
-    {'title': 'Family House in Pokhara Lakeside', 'room_type': 'House',
-     'owner': 'Mohan Adhikari', 'location': 'Kaski', 'rent': 'NPR 32,000', 'status': 'approved'},
-    {'title': '2-Room Set in Butwal City Center', 'room_type': '2 Rooms',
-     'owner': 'Kamala Poudel', 'location': 'Rupandehi', 'rent': 'NPR 11,000', 'status': 'approved'},
-]
-
-MOCK_METRICS = [
-    {'label': 'TOTAL REVENUE (EST.)', 'value': 'NPR 1,24,500', 'delta': '+12% vs last month', 'positive': True},
-    {'label': 'AD IMPRESSIONS', 'value': '48,320', 'delta': '+8% vs last month', 'positive': True},
-    {'label': 'PHONE REVEALS', 'value': '1,247', 'delta': '-3% vs last month', 'positive': False},
-]
-
-MOCK_PROVINCE_COUNTS = [
-    ('Bagmati', 68),
-    ('Gandaki', 22),
-    ('Lumbini', 15),
-    ('Koshi', 12),
-    ('Madhesh', 8),
-    ('Sudurpashchim', 5),
-    ('Karnali', 3),
-]
-
-MOCK_ADS = [
-    {'title': 'Homepage Top Banner', 'status': 'Active',
-     'ad_type': 'Display / Banner', 'size': '728\u00d790', 'revenue': 'NPR 18,200'},
-    {'title': 'Between Listing Cards', 'status': 'Active',
-     'ad_type': 'Banner Ad', 'size': '336\u00d7280', 'revenue': 'NPR 24,100'},
-    {'title': 'Room Detail \u2014 Below Images', 'status': 'Active',
-     'ad_type': 'Banner Ad', 'size': '728\u00d790', 'revenue': 'NPR 12,600'},
-    {'title': 'Phone Reveal (Rewarded)', 'status': 'Active',
-     'ad_type': 'Rewarded Ad', 'size': 'Full Screen', 'revenue': 'NPR 69,600'},
-]
-# ---------------------------------------------------------------------------
 
 
 @login_required
@@ -131,7 +54,11 @@ def dashboard(request):
         template = 'core/dashboard_admin.html'
         context.update(_admin_overview_stats())
         context['active_page'] = 'pending'
-        context['pending_listings'] = MOCK_PENDING_LISTINGS
+        context['pending_listings'] = (
+            Listing.objects.filter(status='pending')
+            .select_related('owner')
+            .prefetch_related('documents')
+        )
 
     else:
         template = 'core/dashboard_tenant.html'
@@ -145,16 +72,61 @@ def admin_listings(request):
     context.update({
         'user': request.user,
         'active_page': 'listings',
-        'listings': MOCK_ALL_LISTINGS,
+        'listings': Listing.objects.all().select_related('owner'),
     })
     return render(request, 'core/admin_listings.html', context)
 
 
 @admin_required
+def admin_listing_detail(request, listing_id):
+    listing = get_object_or_404(
+        Listing.objects.select_related('owner').prefetch_related('documents'),
+        id=listing_id,
+    )
+    context = _admin_overview_stats()
+    context.update({
+        'user': request.user,
+        'active_page': 'listings',
+        'listing': listing,
+    })
+    return render(request, 'core/admin_listing_detail.html', context)
+
+
+@admin_required
+@require_POST
+def admin_approve_listing(request, listing_id):
+    listing = get_object_or_404(Listing, id=listing_id)
+    listing.status = 'approved'
+    listing.rejection_reason = ''
+    listing.save(update_fields=['status', 'rejection_reason'])
+    messages.success(request, f'"{listing.title}" has been approved.')
+    return redirect(request.POST.get('next') or 'core:dashboard')
+
+
+@admin_required
+@require_POST
+def admin_reject_listing(request, listing_id):
+    listing = get_object_or_404(Listing, id=listing_id)
+    listing.status = 'rejected'
+    listing.rejection_reason = request.POST.get('reason', '').strip()
+    listing.save(update_fields=['status', 'rejection_reason'])
+    messages.success(request, f'"{listing.title}" has been rejected.')
+    return redirect(request.POST.get('next') or 'core:dashboard')
+
+
+@admin_required
+@require_POST
+def admin_remove_listing(request, listing_id):
+    listing = get_object_or_404(Listing, id=listing_id)
+    title = listing.title
+    listing.delete()
+    messages.success(request, f'"{title}" has been removed.')
+    return redirect('core:admin_listings')
+
+
+@admin_required
 def admin_users(request):
-    """
-    Real data — every registered user, newest first.
-    """
+    """Real data — every registered user, newest first."""
     context = _admin_overview_stats()
     context.update({
         'user': request.user,
@@ -165,41 +137,9 @@ def admin_users(request):
 
 
 @admin_required
-def admin_analytics(request):
-    context = _admin_overview_stats()
-
-    max_count = max(count for _, count in MOCK_PROVINCE_COUNTS)
-    provinces = [
-        {'name': name, 'count': count, 'pct': round(count / max_count * 100)}
-        for name, count in MOCK_PROVINCE_COUNTS
-    ]
-
-    context.update({
-        'user': request.user,
-        'active_page': 'analytics',
-        'metrics': MOCK_METRICS,
-        'provinces': provinces,
-    })
-    return render(request, 'core/admin_analytics.html', context)
-
-
-@admin_required
-def admin_advertisements(request):
-    context = _admin_overview_stats()
-    context.update({
-        'user': request.user,
-        'active_page': 'ads',
-        'ads': MOCK_ADS,
-    })
-    return render(request, 'core/admin_advertisements.html', context)
-
-
-@admin_required
 @require_POST
 def admin_toggle_user_status(request, user_id):
-    """
-    Flips a user's is_active flag — this is the real Suspend/Restore action.
-    """
+    """Flips a user's is_active flag — this is the real Suspend/Restore action."""
     target = get_object_or_404(User, id=user_id)
 
     if target.id == request.user.id:
@@ -211,3 +151,78 @@ def admin_toggle_user_status(request, user_id):
         messages.success(request, f"{target.get_full_name()} has been {action}.")
 
     return redirect('core:admin_users')
+
+
+@admin_required
+def admin_analytics(request):
+    context = _admin_overview_stats()
+
+    # Real per-province counts of approved listings.
+    province_counts = []
+    for code, label in Listing.PROVINCE_CHOICES:
+        count = Listing.objects.filter(province=code, status='approved').count()
+        province_counts.append((label, count))
+    province_counts.sort(key=lambda pair: pair[1], reverse=True)
+    max_count = max((c for _, c in province_counts), default=0) or 1
+    provinces = [
+        {'name': name, 'count': count, 'pct': round(count / max_count * 100)}
+        for name, count in province_counts
+    ]
+
+    # Real total ad revenue. Impressions/phone reveals have no tracking
+    # system behind them yet, so they stay as clearly-labelled placeholders
+    # until real analytics events are wired up.
+    total_ad_revenue = sum(ad.est_revenue for ad in Advertisement.objects.all())
+    metrics = [
+        {'label': 'TOTAL AD REVENUE (EST.)', 'value': f'NPR {total_ad_revenue:,}',
+         'delta': 'from active ad placements', 'positive': True},
+        {'label': 'AD IMPRESSIONS', 'value': '48,320',
+         'delta': 'no tracking wired up yet', 'positive': True},
+        {'label': 'PHONE REVEALS', 'value': '1,247',
+         'delta': 'no tracking wired up yet', 'positive': False},
+    ]
+
+    context.update({
+        'user': request.user,
+        'active_page': 'analytics',
+        'metrics': metrics,
+        'provinces': provinces,
+    })
+    return render(request, 'core/admin_analytics.html', context)
+
+
+@admin_required
+def admin_advertisements(request):
+    context = _admin_overview_stats()
+    context.update({
+        'user': request.user,
+        'active_page': 'ads',
+        'ads': Advertisement.objects.all(),
+    })
+    return render(request, 'core/admin_advertisements.html', context)
+
+
+@admin_required
+def admin_ad_configure(request, ad_id):
+    ad = get_object_or_404(Advertisement, id=ad_id)
+
+    if request.method == 'POST':
+        ad.title = request.POST.get('title', ad.title).strip()
+        ad.size = request.POST.get('size', ad.size).strip()
+        ad.est_revenue = int(request.POST.get('est_revenue') or ad.est_revenue)
+        ad.is_active = request.POST.get('is_active') == 'on'
+        ad.save()
+        messages.success(request, f'"{ad.title}" has been updated.')
+        return redirect('core:admin_advertisements')
+
+    context = _admin_overview_stats()
+    context.update({'user': request.user, 'active_page': 'ads', 'ad': ad})
+    return render(request, 'core/admin_ad_configure.html', context)
+
+
+@admin_required
+def admin_ad_report(request, ad_id):
+    ad = get_object_or_404(Advertisement, id=ad_id)
+    context = _admin_overview_stats()
+    context.update({'user': request.user, 'active_page': 'ads', 'ad': ad})
+    return render(request, 'core/admin_ad_report.html', context)

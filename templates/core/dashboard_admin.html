@@ -38,29 +38,42 @@
         <div class="review-card">
           <div class="review-card-img">&#127968;</div>
           <div class="review-card-body">
-            <div class="review-card-title">{{ listing.title }}</div>
-            <div class="review-card-loc">&#128205; {{ listing.location }}</div>
+            <a href="{% url 'core:admin_listing_detail' listing.id %}" class="review-card-title" style="color:inherit; text-decoration:none;">
+              {{ listing.title }}
+            </a>
+            <div class="review-card-loc">&#128205; {{ listing.location }}, {{ listing.province }}</div>
             <p class="review-card-desc">{{ listing.description }}</p>
 
             <div class="review-card-meta">
-              <span>&#128100; {{ listing.owner }}</span>
-              <span>&#128176; {{ listing.price }}</span>
-              <span>&#127968; {{ listing.room_type }}</span>
-              <span>&#128197; Submitted {{ listing.submitted }}</span>
+              <span>&#128100; {{ listing.owner.get_full_name }}</span>
+              <span>&#128176; NPR {{ listing.price }}/mo</span>
+              <span>&#127968; {{ listing.get_room_type_display }}</span>
+              <span>&#128197; Submitted {{ listing.created_at|timesince }} ago</span>
             </div>
 
             <div class="doc-badges">
-              {% for doc in listing.documents %}
+              {% for doc in listing.documents.all %}
                 <span class="doc-badge">
-                  &#128196; {{ doc.label }}
-                  <span class="doc-status">{{ doc.status }}</span>
+                  &#128196; {{ doc.get_doc_type_display }}
+                  <span class="doc-status">{{ doc.get_status_display }}</span>
                 </span>
+              {% empty %}
+                <span class="listing-type">No documents uploaded.</span>
               {% endfor %}
             </div>
 
             <div class="review-card-actions">
-              <button type="button" class="btn-approve">&#10003; Approve Listing</button>
-              <button type="button" class="btn-reject">&#10005; Reject</button>
+              <form method="post" action="{% url 'core:admin_approve_listing' listing.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{% url 'core:dashboard' %}">
+                <button type="submit" class="btn-approve">&#10003; Approve Listing</button>
+              </form>
+              <form method="post" action="{% url 'core:admin_reject_listing' listing.id %}"
+                    onsubmit="return confirm('Reject {{ listing.title|escapejs }}?');">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{% url 'core:dashboard' %}">
+                <button type="submit" class="btn-reject">&#10005; Reject</button>
+              </form>
             </div>
           </div>
         </div>

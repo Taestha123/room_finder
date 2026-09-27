@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ listing.title }} — Admin Panel{% endblock %}
+{% block extra_css %}
+  <link rel="stylesheet" href="{% static 'css/admin-dashboard.css' %}">
+{% endblock %}
+{% block content %}
+
+<div class="admin-layout">
+
+  {% include 'core/_admin_sidebar.html' %}
+
+  <main class="admin-content">
+
+    <a href="{% url 'core:admin_listings' %}" class="dash-link">&larr; Back to All Listings</a>
+
+    <div class="review-card" style="margin-top:16px;">
+      <div class="review-card-img">&#127968;</div>
+      <div class="review-card-body">
+        <div class="review-card-title">{{ listing.title }}</div>
+        <div class="review-card-loc">&#128205; {{ listing.location }}, {{ listing.province }}</div>
+
+        <div style="margin-bottom:14px;">
+          {% if listing.status == 'approved' %}
+            <span class="status-pill status-approved">Approved</span>
+          {% elif listing.status == 'rejected' %}
+            <span class="status-pill status-suspended">Rejected</span>
+            {% if listing.rejection_reason %}
+              <span class="listing-type">Reason: {{ listing.rejection_reason }}</span>
+            {% endif %}
+          {% else %}
+            <span class="status-pill status-pending">Pending</span>
+          {% endif %}
+        </div>
+
+        <p class="review-card-desc">{{ listing.description|default:"No description provided." }}</p>
+
+        <div class="review-card-meta">
+          <span>&#128100; {{ listing.owner.get_full_name }} ({{ listing.owner.email }})</span>
+          <span>&#128176; NPR {{ listing.price }}/mo</span>
+          <span>&#127968; {{ listing.get_room_type_display }}</span>
+          <span>&#128065; {{ listing.view_count }} views</span>
+          <span>&#128197; Submitted {{ listing.created_at|date:"Y-m-d" }}</span>
+        </div>
+
+        <div class="doc-badges">
+          {% for doc in listing.documents.all %}
+            <span class="doc-badge">
+              &#128196; {{ doc.get_doc_type_display }}
+              <span class="doc-status">{{ doc.get_status_display }}</span>
+            </span>
+          {% empty %}
+            <span class="listing-type">No documents uploaded.</span>
+          {% endfor %}
+        </div>
+
+        <div class="review-card-actions">
+          {% if listing.status != 'approved' %}
+            <form method="post" action="{% url 'core:admin_approve_listing' listing.id %}">
+              {% csrf_token %}
+              <input type="hidden" name="next" value="{% url 'core:admin_listing_detail' listing.id %}">
+              <button type="submit" class="btn-approve">&#10003; Approve Listing</button>
+            </form>
+          {% endif %}
+          {% if listing.status != 'rejected' %}
+            <form method="post" action="{% url 'core:admin_reject_listing' listing.id %}"
+                  onsubmit="return confirm('Reject {{ listing.title|escapejs }}?');">
+              {% csrf_token %}
+              <input type="hidden" name="next" value="{% url 'core:admin_listing_detail' listing.id %}">
+              <button type="submit" class="btn-reject">&#10005; Reject</button>
+            </form>
+          {% endif %}
+          <form method="post" action="{% url 'core:admin_remove_listing' listing.id %}"
+                onsubmit="return confirm('Permanently remove {{ listing.title|escapejs }}?');">
+            {% csrf_token %}
+            <button type="submit" class="btn-remove" style="padding:10px 18px; font-size:14px;">Remove</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+{% endblock %}
