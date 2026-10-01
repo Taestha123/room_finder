@@ -10,7 +10,7 @@
 </head>
 <body>
 
-  <nav class="navbar">
+    <nav class="navbar">
     <div class="navbar-inner">
       <a href="{% url 'core:home' %}" class="navbar-logo">
         <div class="navbar-logo-box">R</div>
@@ -20,39 +20,42 @@
         </div>
       </a>
 
-      <div class="navbar-links">
-        <a href="{% url 'core:home' %}">Browse Rooms</a>
-        {% if user.is_authenticated and user.role == 'tenant' %}
-          <a href="{% url 'core:dashboard' %}">My Dashboard</a>
-        {% endif %}
-        {% if user.is_authenticated and user.role == 'landlord' %}
-          <a href="{% url 'core:dashboard' %}">My Listings</a>
-        {% endif %}
-        {% if user.is_authenticated and user.role == 'admin' %}
-          <a href="{% url 'core:dashboard' %}">Admin Panel</a>
-        {% endif %}
-      </div>
+      <div class="navbar-right">
+        <div class="navbar-links">
+          <a href="{% url 'core:home' %}">Home</a>
+          <a href="#">About Us</a>
+          <a href="#">Blog</a>
+          <a href="#">Contact</a>
+          {% if user.is_authenticated and user.role == 'landlord' %}
+            <a href="#">My Listings</a>
+          {% endif %}
+          {% if user.is_authenticated and user.role == 'admin' %}
+            <a href="#">Admin Panel</a>
+          {% endif %}
+        </div>
 
-      <div class="navbar-actions">
-        {% if not user.is_authenticated %}
-          <a href="{% url 'accounts:login' %}" class="btn btn-ghost">Log In</a>
-          <a href="{% url 'accounts:register' %}" class="btn btn-primary">Sign Up Free</a>
-        {% else %}
-          <a href="{% url 'core:dashboard' %}" class="btn btn-ghost">Dashboard</a>
-          <a href="{% url 'accounts:logout' %}" class="btn btn-ghost">Sign Out</a>
-        {% endif %}
+        <div class="navbar-actions">
+          {% if not user.is_authenticated %}
+            <a href="{% url 'accounts:login' %}" class="btn btn-ghost">Log In</a>
+            <a href="{% url 'accounts:register' %}" class="btn btn-primary">Sign Up Free</a>
+          {% else %}
+            <a href="{% url 'accounts:logout' %}" class="btn btn-ghost">Sign Out</a>
+          {% endif %}
+        </div>
       </div>
 
       <button class="navbar-toggle" aria-label="Toggle menu">&#9776;</button>
     </div>
 
     <div class="navbar-mobile-menu">
-      <a href="{% url 'core:home' %}">Browse Rooms</a>
+      <a href="{% url 'core:home' %}">Home</a>
+      <a href="#">About Us</a>
+      <a href="#">Blog</a>
+      <a href="#">Contact</a>
       {% if not user.is_authenticated %}
         <a href="{% url 'accounts:login' %}">Log In</a>
         <a href="{% url 'accounts:register' %}" class="btn btn-primary" style="text-align:center;">Sign Up Free</a>
       {% else %}
-        <a href="{% url 'core:dashboard' %}">Dashboard</a>
         <a href="{% url 'accounts:logout' %}">Sign Out</a>
       {% endif %}
     </div>

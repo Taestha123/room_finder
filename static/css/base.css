@@ -79,7 +79,7 @@ input, select, textarea { font-family: var(--font-body); }
   box-shadow: 0 1px 2px rgba(0,0,0,0.03);
 }
 .navbar-inner {
-  max-width: 1280px;
+  max-width: 1500px;
   margin: 0 auto;
   padding: 0 16px;
   height: 64px;
@@ -119,17 +119,28 @@ input, select, textarea { font-family: var(--font-body); }
   text-transform: uppercase;
   line-height: 1.1;
 }
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
 .navbar-links {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 8px;
 }
 .navbar-links a {
   font-size: 14px;
   font-weight: 500;
   color: var(--color-ink-soft);
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: background-color 0.15s, color 0.15s;
 }
-.navbar-links a:hover { color: var(--color-brand); }
+.navbar-links a:hover {
+  color: var(--color-brand);
+  background-color: var(--color-cream-dark);
+}
 .navbar-actions {
   display: flex;
   align-items: center;
