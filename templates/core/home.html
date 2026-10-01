@@ -1,11 +1,156 @@
 {% extends 'base.html' %}
 {% load static %}
+{% block title %}Room Finder — Nepal's Verified Room Rental Marketplace{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
 {% block content %}
-<div class="container" style="padding-top:60px; padding-bottom:60px;">
-  <h1 style="font-size:32px;">Welcome to Room Finder</h1>
-  <p style="color:var(--color-ink-soft);">This is Day 1 — base template and navbar are live.</p>
 
-  <img src="{% static 'img/auth-bg.jpg' %}" alt="Room Finder" style="max-width:100%; border-radius:8px; margin-top:24px;">
+<form method="get" id="search-filter-form">
 
+  <div class="hero-banner">
+    <div class="hero-content">
+      <span class="hero-badge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+          Nepal's Verified Room Rental Marketplace
+      </span>
+      <h1 class="hero-title">Find Your Perfect Room<br><em>in Nepal</em></h1>
+      <p class="hero-subtitle">Verified listings across all 7 provinces. Trusted landlords. No fraud.</p>
+
+      <div class="hero-search-bar">
+        <input type="text" name="q" placeholder="Search by location, area or keyword..." value="{{ query }}">
+        <button type="submit" class="btn btn-primary">
+          <svg class="icon-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          Search
+        </button>
+      </div>
+    </div>
+  </div>
+
+ <div class="stats-band">
+  <div class="stats-band-inner">
+    <div>
+      <div class="stat-number">{{ listings.count }}+</div>
+      <div class="stat-label">Verified Listings</div>
+    </div>
+    <div>
+      <div class="stat-number">7</div>
+      <div class="stat-label">Provinces Covered</div>
+    </div>
+    <div>
+      <div class="stat-number">2,400+</div>
+      <div class="stat-label">Happy Tenants</div>
+    </div>
+    <div>
+      <div class="stat-number">99%</div>
+      <div class="stat-label">Fraud-Free Rate</div>
+    </div>
+  </div>
 </div>
+
+  <div class="ad-banner-placeholder">
+    <span>Advertisement</span>
+    Google AdSense — Banner 728&times;90
+  </div>
+
+  <div class="browse-layout" id="browse-layout">
+
+    <aside class="filter-sidebar">
+      <div class="filter-sidebar-header">
+        <h3>Filters</h3>
+        <a href="{% url 'core:home' %}" class="clear-all-link">Clear All</a>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-group-label">Province</label>
+        <select name="province">
+          <option value="">All Provinces</option>
+          {% for code, label in province_choices %}
+            <option value="{{ code }}" {% if selected_province == code %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-group-label">Property Type</label>
+        <div class="property-pills">
+          <label class="property-pill">
+            <input type="radio" name="room_type" value="" {% if not selected_room_type %}checked{% endif %}>
+            All
+          </label>
+          {% for code, label in room_type_choices %}
+            <label class="property-pill">
+              <input type="radio" name="room_type" value="{{ code }}" {% if selected_room_type == code %}checked{% endif %}>
+              {{ label }}
+            </label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <label class="filter-group-label">Price Range (NPR)</label>
+        <div class="price-inputs">
+          <input type="number" name="min_price" placeholder="Min" value="{{ min_price }}">
+          <span>&ndash;</span>
+          <input type="number" name="max_price" placeholder="Max" value="{{ max_price }}">
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; padding:10px;">Apply Filters</button>
+    </aside>
+
+    <div class="results-main">
+      <div class="results-header">
+  <p class="results-count" style="margin:0;">{{ listings|length }} room{{ listings|length|pluralize }} found</p>
+  <div style="display:flex; gap:8px;">
+    <button type="button" class="hide-filters-btn" id="toggle-filters-btn">
+       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
+       <span id="toggle-filters-label">Hide Filters</span>
+    </button>
+    <select name="sort" onchange="this.form.submit()">
+      <option value="latest" {% if selected_sort == 'latest' %}selected{% endif %}>Latest First</option>
+      <option value="price_low" {% if selected_sort == 'price_low' %}selected{% endif %}>Price: Low to High</option>
+      <option value="price_high" {% if selected_sort == 'price_high' %}selected{% endif %}>Price: High to Low</option>
+    </select>
+  </div>
+</div>
+
+      {% if listings %}
+        <div class="room-grid">
+          {% for listing in listings %}
+            <div class="room-card">
+              <div class="room-card-image">
+                &#127968;
+                <span class="room-card-badge">Verified</span>
+              </div>
+              <div class="room-card-body">
+                <p class="room-card-title">{{ listing.title }}</p>
+                <p class="room-card-location">{{ listing.location }}, {{ listing.get_province_display }}</p>
+                <div class="room-card-footer">
+                  <span class="room-card-price">NPR {{ listing.price }}/mo</span>
+                  <a href="#" class="btn btn-primary" style="padding:6px 14px; font-size:13px;">View</a>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-state">
+          <p>No rooms match your search right now.</p>
+        </div>
+      {% endif %}
+    </div>
+
+  </div>
+
+</form>
+<script>
+  const toggleBtn = document.getElementById('toggle-filters-btn');
+  const layout = document.getElementById('browse-layout');
+  const toggleLabel = document.getElementById('toggle-filters-label');
+  toggleBtn.addEventListener('click', function () {
+    layout.classList.toggle('filters-hidden');
+    toggleLabel.textContent = layout.classList.contains('filters-hidden') ? 'Show Filters' : 'Hide Filters';
+  });
+</script>
 {% endblock %}

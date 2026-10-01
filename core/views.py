@@ -4,13 +4,51 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
 from functools import wraps
 
+from django.db.models import Q
 from accounts.models import User
-from listings.models import Listing
-from listings.models import Advertisement
+from listings.models import Listing, Advertisement
 
 
 def home(request):
-    return render(request, 'core/home.html')
+    listings = Listing.objects.filter(status='approved').select_related('owner')
+
+    query = request.GET.get('q', '').strip()
+    province = request.GET.get('province', '')
+    room_type = request.GET.get('room_type', '')
+    min_price = request.GET.get('min_price', '')
+    max_price = request.GET.get('max_price', '')
+    sort_by = request.GET.get('sort', 'latest')
+
+    if query:
+        listings = listings.filter(Q(title__icontains=query) | Q(location__icontains=query))
+    if province:
+        listings = listings.filter(province=province)
+    if room_type:
+        listings = listings.filter(room_type=room_type)
+    if min_price:
+        listings = listings.filter(price__gte=min_price)
+    if max_price:
+        listings = listings.filter(price__lte=max_price)
+
+    if sort_by == 'price_low':
+        listings = listings.order_by('price')
+    elif sort_by == 'price_high':
+        listings = listings.order_by('-price')
+    else:
+        listings = listings.order_by('-created_at')
+
+    context = {
+        'listings': listings,
+        'province_choices': Listing.PROVINCE_CHOICES,
+        'room_type_choices': Listing.ROOM_TYPE_CHOICES,
+        'query': query,
+        'selected_province': province,
+        'selected_room_type': room_type,
+        'min_price': min_price,
+        'max_price': max_price,
+        'selected_sort': sort_by,
+    }
+    return render(request, 'core/home.html', context)
 
 
 def admin_required(view_func):

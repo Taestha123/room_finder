@@ -70,11 +70,54 @@
   </main>
 
   <footer class="site-footer">
-    <div class="container">
-      <p style="font-size:13px; opacity:0.7; margin:0;">&copy; {% now "Y" %} Room Finder — Nepal's Verified Room Rental Marketplace</p>
+    <div class="footer-cta">
+      <h2>Ready to Find Your Room?</h2>
+      <p>Join thousands of Nepalis who found their home safely on RoomFinder.</p>
+      <div class="footer-cta-buttons">
+        <a href="{% url 'core:home' %}" class="btn btn-primary">Browse Rooms</a>
+        <a href="{% url 'accounts:register' %}" class="btn-outline-light">Create Free Account</a>
+      </div>
+    </div>
+
+    <div class="footer-columns">
+      <div>
+        <div class="footer-brand">
+          <div class="navbar-logo-box" style="width:32px; height:32px; font-size:15px;">R</div>
+          <span style="font-family:var(--font-display); font-weight:600; color:#fff; font-size:16px;">RoomFinder Nepal</span>
+        </div>
+        <p class="footer-brand-desc">Nepal's most trusted verified room rental marketplace. Connecting tenants and landlords safely.</p>
+      </div>
+
+      <div class="footer-col">
+        <p class="footer-col-title">Platform</p>
+        <a href="{% url 'core:home' %}">Browse Rooms</a>
+        <a href="{% url 'accounts:register' %}">List Property</a>
+        <a href="#">About Us</a>
+        <a href="#">Blog</a>
+      </div>
+
+      <div class="footer-col">
+        <p class="footer-col-title">Company</p>
+        <a href="#">About Us</a>
+        <a href="#">Blog</a>
+        <a href="#">Contact</a>
+        <a href="#">Careers</a>
+      </div>
+
+      <div class="footer-col">
+        <p class="footer-col-title">Support</p>
+        <a href="#">Contact Us</a>
+        <a href="#">Report Abuse</a>
+        <a href="#">FAQ</a>
+        <a href="#">Privacy Policy</a>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>&copy; {% now "Y" %} RoomFinder Nepal. All rights reserved.</span>
+      
     </div>
   </footer>
-
   <script src="{% static 'js/main.js' %}"></script>
   {% block extra_js %}{% endblock %}
 </body>
