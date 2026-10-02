@@ -1,6 +1,6 @@
 .about-hero {
   position: relative;
-  padding: 80px 20px 60px;
+  padding: 80px 20px 150px;
   background-image: url('/static/img/about-bg.jpg');
   background-size: cover;
   background-position: center;
@@ -12,7 +12,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(0,0,0,0.55), rgba(0,0,0,0.85));
+  background: linear-gradient(180deg, rgba(0,0,0,0.25), rgba(0,0,0,0.55));
   z-index: 0;
 }
 .about-hero-inner {
@@ -38,6 +38,7 @@
   line-height: 1.15;
   max-width: 700px;
   margin-bottom: 20px;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.4);
 }
 .about-hero-title em {
   color: var(--color-saffron);
@@ -50,30 +51,6 @@
   color: rgba(255,255,255,0.8);
 }
 
-.about-stats {
-  background: var(--color-brand);
-  padding: 18px 20px;
-  display: flex;
-  justify-content: center;
-}
-.about-stats-inner {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  max-width: 1140px;
-  width: 100%;
-  text-align: center;
-}
-.about-stats .stat-number {
-  font-family: var(--font-display);
-  font-size: 28px;
-  font-weight: 700;
-  color: #fff;
-}
-.about-stats .stat-label {
-  font-size: 13px;
-  color: rgba(255,255,255,0.85);
-}
 
 .mission-section {
   max-width: 1140px;
@@ -154,5 +131,5 @@
 
 @media (max-width: 800px) {
   .mission-section { grid-template-columns: 1fr; }
-  .about-stats-inner { grid-template-columns: repeat(2, 1fr); }
+  .about-stats-inline { grid-template-columns: repeat(2, 1fr); }
 }
