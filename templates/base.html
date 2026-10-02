@@ -23,7 +23,7 @@
       <div class="navbar-right">
         <div class="navbar-links">
           <a href="{% url 'core:home' %}">Home</a>
-          <a href="#">About Us</a>
+          <a href="{% url 'core:about' %}">About Us</a>
           <a href="#">Blog</a>
           <a href="#">Contact</a>
           {% if user.is_authenticated and user.role == 'landlord' %}
@@ -49,7 +49,7 @@
 
     <div class="navbar-mobile-menu">
       <a href="{% url 'core:home' %}">Home</a>
-      <a href="#">About Us</a>
+      <a href="{% url 'core:about' %}">About Us</a>
       <a href="#">Blog</a>
       <a href="#">Contact</a>
       {% if not user.is_authenticated %}
@@ -71,7 +71,7 @@
     {% endif %}
     {% block content %}{% endblock %}
   </main>
-
+    {% block footer %}
   <footer class="site-footer">
     <div class="footer-cta">
       <h2>Ready to Find Your Room?</h2>
@@ -95,13 +95,13 @@
         <p class="footer-col-title">Platform</p>
         <a href="{% url 'core:home' %}">Browse Rooms</a>
         <a href="{% url 'accounts:register' %}">List Property</a>
-        <a href="#">About Us</a>
+        <a href="{% url 'core:about' %}">About Us</a>
         <a href="#">Blog</a>
       </div>
 
       <div class="footer-col">
         <p class="footer-col-title">Company</p>
-        <a href="#">About Us</a>
+        <a href="{% url 'core:about' %}">About Us</a>
         <a href="#">Blog</a>
         <a href="#">Contact</a>
         <a href="#">Careers</a>
@@ -121,6 +121,7 @@
       
     </div>
   </footer>
+  {% endblock %}
   <script src="{% static 'js/main.js' %}"></script>
   {% block extra_js %}{% endblock %}
 </body>

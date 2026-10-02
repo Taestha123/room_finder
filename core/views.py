@@ -50,6 +50,8 @@ def home(request):
     }
     return render(request, 'core/home.html', context)
 
+def about(request):
+    return render(request, 'core/about.html')
 
 def admin_required(view_func):
     """

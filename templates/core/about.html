@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}About Us — Room Finder{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/about.css' %}">
+{% endblock %}
+{% block content %}
+
+<div class="about-hero">
+  <div class="about-hero-inner">
+    <span class="about-badge">&#127968; Our Story</span>
+    <h1 class="about-hero-title">We're Building Nepal's Most <em>Trusted</em> Room Marketplace</h1>
+    <p class="about-hero-desc">RoomFinder Nepal was founded in 2026 after our co-founders spent weeks searching for a room in Kathmandu &mdash; encountering fake listings, ghost landlords, and deposit scams along the way. We decided to fix it.</p>
+  </div>
+</div>
+
+<div class="about-stats">
+  <div class="about-stats-inner">
+    <div>
+      <div class="stat-number">500+</div>
+      <div class="stat-label">Verified Listings</div>
+    </div>
+    <div>
+      <div class="stat-number">7</div>
+      <div class="stat-label">Provinces Covered</div>
+    </div>
+    <div>
+      <div class="stat-number">2,400+</div>
+      <div class="stat-label">Happy Tenants</div>
+    </div>
+    <div>
+      <div class="stat-number">99%</div>
+      <div class="stat-label">Fraud-Free Rate</div>
+    </div>
+  </div>
+</div>
+
+<div class="mission-section">
+  <div>
+    <p class="mission-eyebrow">Our Mission</p>
+    <h2 class="mission-title">A rental market built on trust, not luck</h2>
+    <p class="mission-text">
+      Every listing on RoomFinder goes through document verification &mdash; citizenship, Lalpurja, and identity checks &mdash; before it ever reaches a tenant's search results. We believe finding a room shouldn't mean gambling your deposit on a stranger's word.
+    </p>
+  </div>
+  <div class="mission-image"></div>
+</div>
+
+<div class="values-section">
+  <div class="values-inner">
+    <h2 class="values-title">What We Stand For</h2>
+    <div class="values-grid">
+      <div class="value-card">
+        <div class="value-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+        </div>
+        <h3>Verified, Always</h3>
+        <p>Every landlord and listing is manually reviewed before it goes live &mdash; no exceptions.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>
+        </div>
+        <h3>Fast & Transparent</h3>
+        <p>No hidden fees, no surprise charges &mdash; just clear pricing and honest listings.</p>
+      </div>
+      <div class="value-card">
+        <div class="value-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        </div>
+        <h3>For Everyone</h3>
+        <p>Built for Nepal's renters and landlords alike, in every province &mdash; not just the capital.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
