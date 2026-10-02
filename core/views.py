@@ -53,6 +53,12 @@ def home(request):
 def about(request):
     return render(request, 'core/about.html')
 
+def contact(request):
+    submitted = False
+    if request.method == 'POST':
+        submitted = True
+    return render(request, 'core/contact.html', {'submitted': submitted})
+
 def admin_required(view_func):
     """
     Like @login_required, but also bounces non-admins back to their
