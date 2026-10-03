@@ -8,6 +8,9 @@ from django.db.models import Q
 from accounts.models import User
 from listings.models import Listing, Advertisement
 
+from django.core.mail import send_mail
+from django.conf import settings
+
 
 def home(request):
     listings = Listing.objects.filter(status='approved').select_related('owner')
@@ -53,10 +56,25 @@ def home(request):
 def about(request):
     return render(request, 'core/about.html')
 
+def blog(request):
+    return render(request, 'core/blog.html')
+
 def contact(request):
     submitted = False
     if request.method == 'POST':
+        full_name = request.POST.get('full_name')
+        email = request.POST.get('email')
+        subject = request.POST.get('subject')
+        message = request.POST.get('message')
+
+        send_mail(
+            subject=f"[Contact Form] {subject or 'General'} — from {full_name}",
+            message=f"From: {full_name} ({email})\n\n{message}",
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=['nehabasnet77.xdezo@gmail.com'],
+        )
         submitted = True
+
     return render(request, 'core/contact.html', {'submitted': submitted})
 
 def admin_required(view_func):

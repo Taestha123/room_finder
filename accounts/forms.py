@@ -33,9 +33,18 @@ class RegistrationForm(forms.ModelForm):
 
     def clean_email(self):
         email = self.cleaned_data['email'].lower()
-        if User.objects.filter(email=email).exists():
+        existing = User.objects.filter(email=email).first()
+        if existing and existing.email_verified:
             raise forms.ValidationError('An account with this email already exists.')
         return email
+
+    def validate_unique(self):
+        exclude = self._get_validation_exclusions()
+        exclude.add('email')
+        try:
+             self.instance.validate_unique(exclude=exclude)
+        except forms.ValidationError as e:
+             self._update_errors(e)
 
     def clean_phone(self):
         phone = self.cleaned_data['phone']

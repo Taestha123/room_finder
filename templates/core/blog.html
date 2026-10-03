@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Blog — Room Finder{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/blog.css' %}">
+{% endblock %}
+{% block content %}
+
+<div class="blog-hero">
+  <h1>Insights for Tenants, Landlords &amp; Everyone In Between</h1>
+  <p>Guides, legal updates, city reports, and market data &mdash; everything you need to navigate Nepal's rental market confidently.</p>
+</div>
+
+<div class="blog-filters">
+  <button type="button" class="blog-filter-chip active" data-filter="all">All</button>
+  <button type="button" class="blog-filter-chip" data-filter="tenant-tips">Tenant Tips</button>
+  <button type="button" class="blog-filter-chip" data-filter="legal">Legal</button>
+  <button type="button" class="blog-filter-chip" data-filter="city-guides">City Guides</button>
+  <button type="button" class="blog-filter-chip" data-filter="safety">Safety</button>
+  <button type="button" class="blog-filter-chip" data-filter="market-data">Market Data</button>
+</div>
+
+<div class="blog-featured" data-category="tenant-tips">
+  <div class="featured-card">
+    <div class="featured-image" style="background-image:url('{% static 'img/blog-featured.jpg' %}');"></div>
+    <div class="featured-body">
+      <div class="blog-tags">
+        <span class="blog-tag">Tenant Tips</span>
+        <span class="blog-tag featured-tag">Featured</span>
+      </div>
+      <h2>How to Find a Verified Room in Kathmandu in 2026</h2>
+      <p>Kathmandu's rental market moves fast. Here's a practical step-by-step guide to securing a verified, fraud-free room without wasting time or money.</p>
+      <div class="blog-meta">
+        <div class="blog-author-avatar">P</div>
+        <span>Priya Shrestha &middot; Aug 15, 2026 &middot; 6 min read</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="blog-grid-section">
+
+  <div class="blog-card" data-category="safety">
+    <div class="blog-card-image" style="background-image:url('{% static 'img/blog-1.jpg' %}');"></div>
+    <div class="blog-card-body">
+      <span class="blog-tag">Safety</span>
+      <h3 style="margin-top:10px;">How to Spot Fake Room Listings Before You Lose Money</h3>
+      <p>Online rental fraud is rising in Nepal's cities. These are the red flags every tenant must recognise before paying a deposit.</p>
+      <div class="blog-meta">
+        <div class="blog-author-avatar">P</div>
+        <span>Priya Shrestha &middot; 5 min</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="blog-card" data-category="market-data">
+    <div class="blog-card-image" style="background-image:url('{% static 'img/blog-2.jpg' %}');"></div>
+    <div class="blog-card-body">
+      <span class="blog-tag">Market Data</span>
+      <h3 style="margin-top:10px;">Room Rental Price Guide by Province &mdash; Nepal 2026</h3>
+      <p>How much should you actually be paying for a room in your city? We analysed hundreds of verified listings to find out.</p>
+      <div class="blog-meta">
+        <div class="blog-author-avatar">S</div>
+        <span>Sanjay Paudel &middot; 8 min</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="blog-card" data-category="legal">
+    <div class="blog-card-image" style="background-image:url('{% static 'img/blog-3.jpg' %}');"></div>
+    <div class="blog-card-body">
+      <span class="blog-tag">Legal</span>
+      <h3 style="margin-top:10px;">Tenant Rights 101: What Nepali Law Says About Your Deposit</h3>
+      <p>Security deposits are one of the most common sources of landlord-tenant disputes. Here's what the law actually protects.</p>
+      <div class="blog-meta">
+        <div class="blog-author-avatar">A</div>
+        <span>Anup Gurung &middot; 7 min</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="blog-card" data-category="city-guides">
+    <div class="blog-card-image" style="background-image:url('{% static 'img/blog-4.jpg' %}');"></div>
+    <div class="blog-card-body">
+      <span class="blog-tag">City Guides</span>
+      <h3 style="margin-top:10px;">Pokhara vs Kathmandu: Where Should You Rent in 2026?</h3>
+      <p>Two very different rental markets, two very different lifestyles. Here's how they actually compare for renters.</p>
+      <div class="blog-meta">
+        <div class="blog-author-avatar">P</div>
+        <span>Priya Shrestha &middot; 6 min</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="blog-card" data-category="tenant-tips">
+    <div class="blog-card-image" style="background-image:url('{% static 'img/blog-5.jpg' %}');"></div>
+    <div class="blog-card-body">
+      <span class="blog-tag">Tenant Tips</span>
+      <h3 style="margin-top:10px;">Moving In: A Checklist for Your First Week in a New Room</h3>
+      <p>From utility transfers to documenting existing damage &mdash; the small things new tenants forget to do.</p>
+      <div class="blog-meta">
+        <div class="blog-author-avatar">S</div>
+        <span>Sanjay Paudel &middot; 4 min</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="blog-card" data-category="safety">
+    <div class="blog-card-image" style="background-image:url('{% static 'img/blog-6.jpg' %}');"></div>
+    <div class="blog-card-body">
+      <span class="blog-tag">Safety</span>
+      <h3 style="margin-top:10px;">A Landlord's Guide to Staying Safe When Renting Out Your Property</h3>
+      <p>Verification isn't just protection for tenants &mdash; here's how landlords benefit from it too.</p>
+      <div class="blog-meta">
+        <div class="blog-author-avatar">A</div>
+        <span>Anup Gurung &middot; 5 min</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const chips = document.querySelectorAll('.blog-filter-chip');
+  const cards = document.querySelectorAll('[data-category]');
+
+  chips.forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      chips.forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      const filter = chip.dataset.filter;
+
+      cards.forEach(function (card) {
+        if (filter === 'all' || card.dataset.category === filter) {
+          card.style.display = '';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    });
+  });
+</script>
+
+{% endblock %}

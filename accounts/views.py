@@ -17,17 +17,28 @@ def _send_otp(user):
         recipient_list=[user.email],
     )
 
-
 def register(request):
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
         if form.is_valid():
-            user = form.save(commit=False)
-            user.email = form.cleaned_data['email']
-            user.set_password(form.cleaned_data['password1'])
-            user.is_active = False
-            user.email_verified = False
-            user.save()
+            email = form.cleaned_data['email']
+            existing = User.objects.filter(email=email, email_verified=False).first()
+
+            if existing:
+                user = existing
+                user.first_name = form.cleaned_data['first_name']
+                user.last_name = form.cleaned_data['last_name']
+                user.phone = form.cleaned_data['phone']
+                user.role = form.cleaned_data['role']
+                user.set_password(form.cleaned_data['password1'])
+                user.save()
+            else:
+                user = form.save(commit=False)
+                user.email = email
+                user.set_password(form.cleaned_data['password1'])
+                user.is_active = False
+                user.email_verified = False
+                user.save()
 
             _send_otp(user)
             request.session['pending_user_id'] = user.id

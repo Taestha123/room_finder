@@ -130,13 +130,20 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # https://docs.djangoproject.com/en/6.1/topics/email/#topic-email-configuration
 
 MAILERS = {
-    'default': {
-        'BACKEND': 'django.core.mail.backends.console.EmailBackend',
+    "default": {
+        "BACKEND": "django.core.mail.backends.smtp.EmailBackend",
+        "OPTIONS": {
+            "host": "smtp.gmail.com",
+            "port": 587,
+            "use_tls": True,
+            "username": "nehabasnet77.xdezo@gmail.com",
+            "password": "dpog wprj svhq nwbx",
+        },
     },
 }
 
 LOGIN_URL = 'accounts:login'
 LOGIN_REDIRECT_URL = 'core:dashboard'
 LOGOUT_REDIRECT_URL = 'core:home'
-DEFAULT_FROM_EMAIL = 'noreply@roomfinder.local'
+DEFAULT_FROM_EMAIL = 'nehabasnet77.xdezo@gmail.com'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
