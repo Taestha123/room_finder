@@ -35,12 +35,16 @@
         </div>
 
         <div class="navbar-actions">
-          {% if not user.is_authenticated %}
-            <a href="{% url 'accounts:login' %}" class="btn btn-ghost">Log In</a>
-            <a href="{% url 'accounts:register' %}" class="btn btn-primary">Sign Up Free</a>
-          {% else %}
-            <a href="{% url 'accounts:logout' %}" class="btn btn-ghost">Sign Out</a>
-          {% endif %}
+           {% if not user.is_authenticated %}
+              <a href="{% url 'accounts:login' %}" class="btn btn-ghost">Log In</a>
+              <a href="{% url 'accounts:register' %}" class="btn btn-primary">Sign Up Free</a>
+           {% else %}
+              <a href="{% url 'core:dashboard' %}" class="navbar-profile">
+                <span class="navbar-profile-avatar">{{ user.first_name|first|upper }}</span>
+                {{ user.first_name }}
+              </a>
+              <a href="{% url 'accounts:logout' %}" class="btn btn-ghost logout-link">Sign Out</a>
+           {% endif %}
         </div>
       </div>
 
@@ -53,10 +57,11 @@
       <a href="{% url 'core:blog' %}">Blog</a>
       <a href="{% url 'core:contact' %}">Contact</a>
       {% if not user.is_authenticated %}
-        <a href="{% url 'accounts:login' %}">Log In</a>
-        <a href="{% url 'accounts:register' %}" class="btn btn-primary" style="text-align:center;">Sign Up Free</a>
+         <a href="{% url 'accounts:login' %}">Log In</a>
+         <a href="{% url 'accounts:register' %}" class="btn btn-primary" style="text-align:center;">Sign Up Free</a>
       {% else %}
-        <a href="{% url 'accounts:logout' %}">Sign Out</a>
+         <a href="{% url 'core:dashboard' %}">{{ user.first_name }} (Dashboard)</a>
+         <a href="{% url 'accounts:logout' %}" class="logout-link">Sign Out</a>
       {% endif %}
     </div>
   </nav>

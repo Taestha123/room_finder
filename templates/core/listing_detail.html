@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}{{ listing.title }} — Room Finder{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/listing_detail.css' %}">
+{% endblock %}
+{% block content %}
+
+<div class="detail-wrapper">
+
+  <div class="breadcrumb">
+    <a href="{% url 'core:home' %}">&larr; Back to Listings</a>
+    <span>/</span>
+    <span>{{ listing.get_province_display }}</span>
+    <span>/</span>
+    <span class="current">{{ listing.title|truncatechars:30 }}</span>
+  </div>
+
+  <div class="detail-grid">
+
+    <div>
+      <div class="detail-image" {% if listing.images.first %}style="background-image:url('{{ listing.images.first.image.url }}'); background-size:cover; background-position:center;"{% endif %}>
+        {% if not listing.images.first %}&#127968;{% endif %}
+        <span class="detail-type-badge">{{ listing.get_room_type_display }}</span>
+        <span class="detail-counter">&#10003; Verified</span>
+    </div>
+
+      <div class="detail-card">
+        <h2>Description</h2>
+        <p class="detail-description">{{ listing.description }}</p>
+      </div>
+
+      <div class="detail-card">
+        <h2>Location</h2>
+        <p class="detail-location-text">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+          {{ listing.location }}, {{ listing.get_province_display }}
+        </p>
+        <div class="detail-map-placeholder">
+          &#128506;
+          Map view coming soon
+        </div>
+      </div>
+    </div>
+
+    <div class="detail-sidebar">
+      <div class="detail-price">NPR {{ listing.price }}</div>
+      <div class="detail-price-label">per month</div>
+       {% if user.is_authenticated and user.role == 'tenant' %}
+  <form method="post" action="{% url 'core:toggle_favorite' listing.pk %}" style="margin-bottom:16px;">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+    <button type="submit" class="btn {% if is_favorited %}btn-primary{% else %}btn-ghost{% endif %}" style="width:100%; justify-content:center; padding:10px; border:1px solid var(--color-rule);">
+      {% if is_favorited %}&#10084; Saved{% else %}&#9825; Save to Favourites{% endif %}
+    </button>
+  </form>
+{% endif %}
+      <div class="detail-meta-row">
+        <span>Posted</span>
+        <span>{{ listing.created_at|timesince }} ago</span>
+      </div>
+
+      <p class="owner-label">Property Owner</p>
+      <div class="owner-row">
+        <div class="owner-avatar">{{ listing.owner.first_name|first|upper }}</div>
+        <div>
+          <div class="owner-name">{{ listing.owner.get_full_name }}</div>
+          <div class="owner-verified">&#9733; Verified Landlord</div>
+        </div>
+      </div>
+
+      {% if user.is_authenticated and user.role == 'tenant' %}
+        <div class="phone-reveal-box" id="phone-reveal-box">
+           {% if phone_revealed %}
+              <div class="phone-revealed">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                  {{ listing.owner.phone }}
+              </div>
+          {% else %}
+              <div class="phone-masked" id="phone-masked">98XXXXXXXX</div>
+              <button type="button" class="btn btn-primary reveal-btn" id="reveal-phone-btn" data-url="{% url 'core:reveal_phone' listing.pk %}">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                   Reveal Contact Number
+              </button>
+              <p class="reveal-note">Watch a short ad to reveal the number</p>
+          {% endif %}
+        </div>
+     {% elif user.is_authenticated %}
+         <a href="#" class="btn btn-primary" style="width:100%; justify-content:center; padding:12px;">Contact Landlord</a>
+     {% else %}
+        <a href="{% url 'accounts:login' %}" class="btn btn-primary" style="width:100%; justify-content:center; padding:12px;">Log In to Contact</a>
+     {% endif %}
+
+      <div class="safety-card">
+        <span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
+        <div>
+          <strong>Safety Reminder</strong>
+          Always visit the property in person before making any payment, and never send a deposit without seeing it first.
+        </div>
+      </div>
+      <span class="report-link" id="open-report-modal">
+         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg>
+         Report this listing
+      </span>
+    </div>
+  </div>
+</div>
+{% if user.is_authenticated %}
+<div class="report-modal-overlay" id="report-modal-overlay">
+  <div class="report-modal">
+    <h3>Report this listing</h3>
+    <p>Help us keep RoomFinder safe — tell us what's wrong with this listing.</p>
+    <form method="post" action="{% url 'core:report_listing' listing.pk %}">
+      {% csrf_token %}
+      <select name="reason" required>
+        <option value="">Select a reason...</option>
+        <option value="fake">Fake or misleading listing</option>
+        <option value="scam">Suspected scam / deposit fraud</option>
+        <option value="duplicate">Duplicate listing</option>
+        <option value="inappropriate">Inappropriate content</option>
+        <option value="other">Other</option>
+      </select>
+      <textarea name="details" rows="3" placeholder="Any extra details (optional)"></textarea>
+      <div class="report-modal-actions">
+        <button type="button" class="btn btn-ghost" id="close-report-modal" style="border:1px solid var(--color-rule);">Cancel</button>
+        <button type="submit" class="btn btn-primary">Submit Report</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endif %}
+
+<script>
+  var openBtn = document.getElementById('open-report-modal');
+  var overlay = document.getElementById('report-modal-overlay');
+  if (openBtn && overlay) {
+    var closeBtn = document.getElementById('close-report-modal');
+    openBtn.addEventListener('click', function () { overlay.classList.add('open'); });
+    closeBtn.addEventListener('click', function () { overlay.classList.remove('open'); });
+    overlay.addEventListener('click', function (e) {
+      if (e.target === overlay) overlay.classList.remove('open');
+    });
+  }
+    var revealBtn = document.getElementById('reveal-phone-btn');
+  if (revealBtn) {
+    revealBtn.addEventListener('click', function () {
+      var box = document.getElementById('phone-reveal-box');
+      box.innerHTML = '<div class="ad-watching"><span class="ad-spinner"></span> Watching ad&hellip;</div>';
+
+      setTimeout(function () {
+        fetch(revealBtn.dataset.url, {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+          },
+        })
+          .then(function (res) { return res.json(); })
+          .then(function (data) {
+            box.innerHTML = '<div class="phone-revealed">' +
+              '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>' +
+              data.phone + '</div>';
+          });
+      }, 5000);
+    });
+  }
+</script>
+{% endblock %}

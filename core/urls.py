@@ -5,6 +5,10 @@ app_name = 'core'
 
 urlpatterns = [
     path('', views.home, name='home'),
+    path('listings/<int:pk>/', views.listing_detail, name='listing_detail'),
+    path('listings/<int:pk>/favorite/', views.toggle_favorite, name='toggle_favorite'),
+    path('listings/<int:pk>/report/', views.report_listing, name='report_listing'),
+    path('listings/<int:pk>/reveal-phone/', views.reveal_phone, name='reveal_phone'),
     path('about/', views.about, name='about'),
     path('blog/', views.blog, name='blog'),
     path('contact/', views.contact, name='contact'),

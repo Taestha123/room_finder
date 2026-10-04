@@ -6,14 +6,14 @@ from functools import wraps
 
 from django.db.models import Q
 from accounts.models import User
-from listings.models import Listing, Advertisement
+from listings.models import Listing, Advertisement, Favorite, Report
 
 from django.core.mail import send_mail
 from django.conf import settings
-
+from django.http import JsonResponse
 
 def home(request):
-    listings = Listing.objects.filter(status='approved').select_related('owner')
+    listings = Listing.objects.filter(status='approved').select_related('owner').prefetch_related('images')
 
     query = request.GET.get('q', '').strip()
     province = request.GET.get('province', '')
@@ -39,9 +39,15 @@ def home(request):
         listings = listings.order_by('-price')
     else:
         listings = listings.order_by('-created_at')
+    favorited_ids = set()
+    if request.user.is_authenticated and request.user.role == 'tenant':
+        favorited_ids = set(
+            Favorite.objects.filter(tenant=request.user).values_list('listing_id', flat=True)
+        )
 
     context = {
         'listings': listings,
+        'favorited_ids': favorited_ids,
         'province_choices': Listing.PROVINCE_CHOICES,
         'room_type_choices': Listing.ROOM_TYPE_CHOICES,
         'query': query,
@@ -52,6 +58,67 @@ def home(request):
         'selected_sort': sort_by,
     }
     return render(request, 'core/home.html', context)
+
+def listing_detail(request, pk):
+    listing = get_object_or_404(
+        Listing.objects.prefetch_related('images'),
+        pk=pk,
+        status='approved',
+    )
+    is_favorited = False
+    phone_revealed = False
+    if request.user.is_authenticated and request.user.role == 'tenant':
+        is_favorited = Favorite.objects.filter(tenant=request.user, listing=listing).exists()
+        phone_revealed = pk in request.session.get('revealed_phones', [])
+
+    return render(request, 'core/listing_detail.html', {
+        'listing': listing,
+        'is_favorited': is_favorited,
+        'phone_revealed': phone_revealed,
+    })
+
+@login_required
+@require_POST
+def toggle_favorite(request, pk):
+    listing = get_object_or_404(Listing, pk=pk, status='approved')
+    favorite, created = Favorite.objects.get_or_create(tenant=request.user, listing=listing)
+
+    if not created:
+        favorite.delete()
+        is_saved = False
+    else:
+        is_saved = True
+
+    next_url = request.POST.get('next') or 'core:home'
+    messages.success(request, 'Saved to favourites.' if is_saved else 'Removed from favourites.')
+    return redirect(next_url)
+
+def report_listing(request, pk):
+    listing = get_object_or_404(Listing, pk=pk, status='approved')
+    reason = request.POST.get('reason')
+    details = request.POST.get('details', '').strip()
+
+    if not reason:
+        messages.error(request, 'Please select a reason for the report.')
+    else:
+        Report.objects.create(listing=listing, reporter=request.user, reason=reason, details=details)
+        messages.success(request, 'Thank you — your report has been submitted and will be reviewed by our team.')
+
+    return redirect('core:listing_detail', pk=pk)
+
+@login_required
+def reveal_phone(request, pk):
+    listing = get_object_or_404(Listing, pk=pk, status='approved')
+
+    if request.user.role != 'tenant':
+        return JsonResponse({'error': 'Only tenants can reveal contact numbers.'}, status=403)
+
+    revealed = request.session.get('revealed_phones', [])
+    if pk not in revealed:
+        revealed.append(pk)
+        request.session['revealed_phones'] = revealed
+
+    return JsonResponse({'phone': listing.owner.phone})
 
 def about(request):
     return render(request, 'core/about.html')
@@ -125,7 +192,25 @@ def dashboard(request):
         )
 
     else:
-        template = 'core/dashboard_tenant.html'
+            template = 'core/dashboard_tenant.html'
+
+            favorites = (
+                Favorite.objects.filter(tenant=user)
+                .select_related('listing', 'listing__owner')
+                .prefetch_related('listing__images')
+            )
+            saved_listings = [f.listing for f in favorites]
+            saved_ids = [listing.id for listing in saved_listings]
+
+            context['saved_count'] = len(saved_listings)
+            context['saved_listings'] = saved_listings
+            context['recommended_listings'] = (
+                Listing.objects.filter(status='approved')
+                .exclude(id__in=saved_ids)
+                .select_related('owner')
+                .prefetch_related('images')
+                .order_by('-created_at')[:3]
+            )
 
     return render(request, template, context)
 

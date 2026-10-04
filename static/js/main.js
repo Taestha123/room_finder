@@ -7,4 +7,11 @@ document.addEventListener('DOMContentLoaded', function () {
       mobileMenu.classList.toggle('open');
     });
   }
+  document.querySelectorAll('.logout-link').forEach(function (link) {
+  link.addEventListener('click', function (e) {
+    if (!confirm('Are you sure you want to log out?')) {
+      e.preventDefault();
+    }
+  });
+});
 });

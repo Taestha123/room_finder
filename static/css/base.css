@@ -155,6 +155,31 @@ input, select, textarea { font-family: var(--font-body); }
   font-size: 22px;
   color: var(--color-ink-soft);
 }
+.navbar-profile {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 6px;
+  border-radius: 20px;
+  background: var(--color-cream-dark);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+.navbar-profile:hover { background: var(--color-rule); }
+.navbar-profile-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-brand);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
 
 @media (max-width: 768px) {
   .navbar-links, .navbar-actions { display: none; }

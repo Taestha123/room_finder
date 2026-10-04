@@ -7,7 +7,7 @@ Finder {% endblock %} {% block extra_css %}
   <div class="dash-header-inner">
     <div>
       <div class="dash-eyebrow">Tenant Dashboard</div>
-      <h1 class="dash-title">Welcome back, {{ user.first_name }} &#128075;</h1>
+      <h1 class="dash-title">Welcome back, {{ user.first_name }} </h1>
       <p class="dash-subtitle">
         Here's what's happening with your room search.
       </p>
@@ -19,22 +19,18 @@ Finder {% endblock %} {% block extra_css %}
 <div class="container dash-section">
   <div class="stat-grid">
     <div class="stat-card">
-      <div class="stat-icon brand">&#10084;</div>
-      <div class="stat-value">0</div>
+      <div class="stat-value">{{ saved_count }}</div>
       <div class="stat-label">Saved Rooms</div>
     </div>
     <div class="stat-card">
-      <div class="stat-icon gold">&#128196;</div>
       <div class="stat-value">0</div>
       <div class="stat-label">Applications Sent</div>
     </div>
     <div class="stat-card">
-      <div class="stat-icon leaf">&#9993;</div>
       <div class="stat-value">0</div>
       <div class="stat-label">Unread Messages</div>
     </div>
     <div class="stat-card">
-      <div class="stat-icon saffron">&#128065;</div>
       <div class="stat-value">0</div>
       <div class="stat-label">Rooms Viewed</div>
     </div>
@@ -69,45 +65,27 @@ Finder {% endblock %} {% block extra_css %}
     <a href="{% url 'core:home' %}" class="dash-link">View all &rarr;</a>
   </div>
 
+{% if recommended_listings %}
   <div class="room-grid">
-    <div class="room-card">
-      <div class="room-card-img">&#127968;</div>
-      <div class="room-card-body">
-        <div class="room-card-title">Cozy Single Room</div>
-        <div class="room-card-loc">Kupondole, Lalitpur</div>
-        <div class="room-card-foot">
-          <span class="room-card-price">Rs 9,500/mo</span>
-          <span class="badge">Verified</span>
+    {% for listing in recommended_listings %}
+      <a href="{% url 'core:listing_detail' listing.pk %}" class="room-card" style="display:block; text-decoration:none; color:inherit;">
+        <div class="room-card-img" {% if listing.images.first %}style="background-image:url('{{ listing.images.first.image.url }}'); background-size:cover; background-position:center;"{% endif %}>
+          {% if not listing.images.first %}&#127968;{% endif %}
         </div>
-      </div>
-    </div>
-    <div class="room-card">
-      <div class="room-card-img">&#127968;</div>
-      <div class="room-card-body">
-        <div class="room-card-title">2BHK Flat, Near Ring Road</div>
-        <div class="room-card-loc">Baneshwor, Kathmandu</div>
-        <div class="room-card-foot">
-          <span class="room-card-price">Rs 22,000/mo</span>
-          <span class="badge">Verified</span>
+        <div class="room-card-body">
+          <div class="room-card-title">{{ listing.title }}</div>
+          <div class="room-card-loc">{{ listing.location }}, {{ listing.province }}</div>
+          <div class="room-card-foot">
+            <span class="room-card-price">NPR {{ listing.price }}/mo</span>
+            <span class="badge-verified">Verified</span>
+          </div>
         </div>
-      </div>
-    </div>
-    <div class="room-card">
-      <div class="room-card-img">&#127968;</div>
-      <div class="room-card-body">
-        <div class="room-card-title">Shared Room for Students</div>
-        <div class="room-card-loc">Balkumari, Lalitpur</div>
-        <div class="room-card-foot">
-          <span class="room-card-price">Rs 6,000/mo</span>
-          <span class="badge">Verified</span>
-        </div>
-      </div>
-    </div>
+      </a>
+    {% endfor %}
   </div>
-  <p style="font-size: 12px; color: var(--color-muted); margin-top: 10px">
-    Sample listings shown above — will populate automatically once the listings
-    module is connected.
-  </p>
+{% else %}
+  <p style="font-size: 13px; color: var(--color-ink-soft);">No listings available right now — check back soon.</p>
+{% endif %}
 </div>
 
 <div class="container dash-section" style="padding-bottom: 60px">
@@ -116,14 +94,34 @@ Finder {% endblock %} {% block extra_css %}
       <div class="dash-section-head">
         <div class="dash-section-title">Saved Listings</div>
       </div>
-      <div class="empty-state">
-        <div class="empty-state-icon">&#10084;</div>
-        <div class="empty-state-title">No saved rooms yet</div>
-        <div class="empty-state-sub">
-          Tap the heart icon on any listing to save it here for later.
+     {% if saved_listings %}
+  <div class="room-grid">
+    {% for listing in saved_listings %}
+      <a href="{% url 'core:listing_detail' listing.pk %}" class="room-card" style="display:block; text-decoration:none; color:inherit;">
+        <div class="room-card-img" {% if listing.images.first %}style="background-image:url('{{ listing.images.first.image.url }}'); background-size:cover; background-position:center;"{% endif %}>
+          {% if not listing.images.first %}&#127968;{% endif %}
         </div>
-        <a href="{% url 'core:home' %}" class="btn btn-primary">Browse Rooms</a>
-      </div>
+        <div class="room-card-body">
+          <div class="room-card-title">{{ listing.title }}</div>
+          <div class="room-card-loc">{{ listing.location }}, {{ listing.province }}</div>
+          <div class="room-card-foot">
+            <span class="room-card-price">NPR {{ listing.price }}/mo</span>
+            <span class="badge-verified">Verified</span>
+          </div>
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+{% else %}
+  <div class="empty-state">
+    <div class="empty-state-icon">&#10084;</div>
+    <div class="empty-state-title">No saved rooms yet</div>
+    <div class="empty-state-sub">
+      Tap the heart icon on any listing to save it here for later.
+    </div>
+    <a href="{% url 'core:home' %}" class="btn btn-primary">Browse Rooms</a>
+  </div>
+{% endif %}
     </div>
 
     <div class="side-card">

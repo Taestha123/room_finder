@@ -370,3 +370,29 @@
 .browse-layout.filters-hidden .filter-sidebar {
   display: none;
 }
+
+.room-card-image { position: relative; }
+
+.save-heart-btn {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  color: var(--color-ink-soft);
+  z-index: 1;
+}
+.save-heart-btn:hover { color: var(--color-brand); }
+.save-heart-btn.is-saved {
+  color: var(--color-brand);
+}
+.save-heart-btn.is-saved svg {
+  fill: var(--color-brand);
+}
