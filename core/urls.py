@@ -14,6 +14,9 @@ urlpatterns = [
     path('contact/', views.contact, name='contact'),
     path('dashboard/', views.dashboard, name='dashboard'),
 
+    path('dashboard/my-listings/add/', views.landlord_add_listing, name='landlord_add_listing'),
+    path('dashboard/my-listings/<int:pk>/edit/', views.landlord_edit_listing, name='landlord_edit_listing'),
+    path('dashboard/my-listings/<int:pk>/documents/', views.landlord_upload_document, name='landlord_upload_document'),
     path('dashboard/listings/', views.admin_listings, name='admin_listings'),
     path('dashboard/listings/<int:listing_id>/', views.admin_listing_detail, name='admin_listing_detail'),
     path('dashboard/listings/<int:listing_id>/approve/', views.admin_approve_listing, name='admin_approve_listing'),

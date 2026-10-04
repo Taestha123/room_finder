@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block footer %}{% endblock %}
+{% block title %}Edit Listing — Room Finder{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}" />
+<link rel="stylesheet" href="{% static 'css/landlord.css' %}" />
+{% endblock %}
+
+{% block content %}
+<div class="container ld-header">
+  <a href="{% url 'core:dashboard' %}" class="ld-back">&larr; Back to dashboard</a>
+  <h1 class="ld-title">Edit Listing</h1>
+  <p class="ld-sub">{{ listing_title }} &middot; <span class="ld-badge ld-badge-{{ listing.status }}">{{ listing.get_status_display }}</span></p>
+</div>
+
+<div class="container">
+  {% if listing.status == 'rejected' %}
+    <div class="ld-alert">
+      This listing was rejected{% if listing.rejection_reason %}: {{ listing.rejection_reason }}{% endif %}.
+      Saving your changes sends it back for review.
+    </div>
+  {% endif %}
+
+  <div class="ld-panel is-active">
+    <form method="post" enctype="multipart/form-data" class="ld-form" novalidate>
+      {% csrf_token %}
+      {% if file_errors or listing_form.errors or facility_form.errors %}
+        <div class="ld-alert">
+          <strong>Please fix the highlighted problems below.</strong>
+          {% for e in file_errors %}<div>{{ e }}</div>{% endfor %}
+        </div>
+      {% endif %}
+
+      {% include 'core/_ld_listing_form_fields.html' %}
+
+      <h3 class="ld-form-heading">Photos</h3>
+      {% if images %}
+        <div class="ld-photo-grid">
+          {% for img in images %}
+            <label class="ld-photo">
+              <span class="ld-photo-img" style="background-image:url('{{ img.image.url }}')"></span>
+              <span class="ld-photo-remove"><input type="checkbox" name="remove_images" value="{{ img.id }}" /> Remove</span>
+            </label>
+          {% endfor %}
+        </div>
+      {% endif %}
+      <div class="ld-field ld-wide">
+        <label for="id_images">Add more photos</label>
+        <input type="file" name="images" id="id_images" accept=".jpg,.jpeg,.png,.webp" multiple class="ld-input ld-file" />
+        <small>Up to {{ max_images }} photos in total, 5 MB each.</small>
+      </div>
+
+      <div class="ld-form-actions">
+        <button type="submit" class="btn btn-primary">Save changes</button>
+        <a href="{% url 'core:dashboard' %}" class="ld-btn ld-btn-edit">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ province_districts|json_script:"province-districts" }}
+<script src="{% static 'js/landlord.js' %}"></script>
+{% endblock %}

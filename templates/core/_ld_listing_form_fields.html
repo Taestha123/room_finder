@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block footer %}{% endblock %}
+{% block title %}Landlord Dashboard — Room Finder{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}" />
+<link rel="stylesheet" href="{% static 'css/landlord.css' %}" />
+{% endblock %}
+
+{% block content %}
+<div class="container ld-header">
+  <h1 class="ld-title">Landlord Dashboard</h1>
+  <p class="ld-sub">Welcome back, {{ user.get_full_name }}</p>
+</div>
+
+<div class="container">
+  <div class="ld-stats">
+    <div class="ld-stat">
+      <div class="ld-stat-icon">&#127968;</div>
+      <div class="ld-stat-value">{{ stats.total }}</div>
+      <div class="ld-stat-label">Total Listings</div>
+    </div>
+    <div class="ld-stat">
+      <div class="ld-stat-icon">&#9989;</div>
+      <div class="ld-stat-value">{{ stats.approved }}</div>
+      <div class="ld-stat-label">Approved</div>
+    </div>
+    <div class="ld-stat">
+      <div class="ld-stat-icon">&#8987;</div>
+      <div class="ld-stat-value">{{ stats.pending }}</div>
+      <div class="ld-stat-label">Pending</div>
+    </div>
+    <div class="ld-stat">
+      <div class="ld-stat-icon">&#128065;</div>
+      <div class="ld-stat-value">{{ stats.views }}</div>
+      <div class="ld-stat-label">Total Views</div>
+    </div>
+  </div>
+
+  <div class="ld-tabs" role="tablist">
+    <a href="?tab=listings" data-tab="listings" class="ld-tab{% if active_tab == 'listings' %} is-active{% endif %}">&#128203; My Listings</a>
+    <a href="?tab=add" data-tab="add" class="ld-tab{% if active_tab == 'add' %} is-active{% endif %}">&#10133; Add Listing</a>
+    <a href="?tab=documents" data-tab="documents" class="ld-tab{% if active_tab == 'documents' %} is-active{% endif %}">&#128196; Documents</a>
+  </div>
+
+  {# ---------------- My Listings ---------------- #}
+  <section class="ld-panel{% if active_tab == 'listings' %} is-active{% endif %}" data-panel="listings">
+    {% for listing in my_listings %}
+      <article class="ld-row">
+        <div class="ld-thumb"{% if listing.cover %} style="background-image:url('{{ listing.cover.image.url }}')"{% endif %}>
+          {% if not listing.cover %}&#127968;{% endif %}
+        </div>
+        <div class="ld-info">
+          <h3 class="ld-row-title">{{ listing.title }}</h3>
+          <p class="ld-meta">{{ listing.location }} &middot; {{ listing.get_room_type_display }}</p>
+          <p class="ld-price">NPR {{ listing.price|floatformat:"0g" }}/mo</p>
+          {% if listing.status == 'rejected' and listing.rejection_reason %}
+            <p class="ld-reject">Rejected: {{ listing.rejection_reason }}</p>
+          {% endif %}
+        </div>
+        <div class="ld-side">
+          <span class="ld-badge ld-badge-{{ listing.status }}">{{ listing.get_status_display }}</span>
+          <div class="ld-actions">
+            <a href="{% url 'core:landlord_edit_listing' listing.pk %}" class="ld-btn ld-btn-edit">Edit</a>
+            {% if listing.status == 'approved' %}
+              <a href="{% url 'core:listing_detail' listing.pk %}" class="ld-btn ld-btn-view">View</a>
+            {% else %}
+              <span class="ld-btn ld-btn-view is-disabled" title="Visible to tenants once approved">View</span>
+            {% endif %}
+          </div>
+        </div>
+      </article>
+    {% empty %}
+      <div class="ld-empty">
+        <div class="ld-empty-icon">&#127968;</div>
+        <div class="ld-empty-title">You haven't listed any rooms yet</div>
+        <p>Add your first room to start reaching verified tenants.</p>
+        <a href="?tab=add" data-tab="add" class="btn btn-primary">&#43; Add Listing</a>
+      </div>
+    {% endfor %}
+  </section>
+
+  {# ---------------- Add Listing ---------------- #}
+  <section class="ld-panel{% if active_tab == 'add' %} is-active{% endif %}" data-panel="add">
+    <form method="post" action="{% url 'core:landlord_add_listing' %}" enctype="multipart/form-data" class="ld-form" novalidate>
+      {% csrf_token %}
+      {% if file_errors or listing_form.errors or facility_form.errors %}
+        <div class="ld-alert">
+          <strong>Please fix the highlighted problems below.</strong>
+          {% for e in file_errors %}<div>{{ e }}</div>{% endfor %}
+        </div>
+      {% endif %}
+
+      {% include 'core/_ld_listing_form_fields.html' %}
+
+      <h3 class="ld-form-heading">Photos <span class="ld-req">*</span></h3>
+      <div class="ld-field ld-wide">
+        <input type="file" name="images" id="id_images" accept=".jpg,.jpeg,.png,.webp" multiple class="ld-input ld-file" />
+        <small>Up to {{ max_images }} photos, 5 MB each (JPG, PNG or WebP). The first one becomes the cover.</small>
+      </div>
+
+      <h3 class="ld-form-heading">Verification documents <span class="ld-optional">optional now &middot; can be added later in the Documents tab</span></h3>
+      <div class="ld-grid">
+        {% for code, label in doc_types %}
+          <div class="ld-field">
+            <label for="id_doc_{{ code }}">{{ label }}</label>
+            <input type="file" name="doc_{{ code }}" id="id_doc_{{ code }}" accept=".jpg,.jpeg,.png,.webp,.pdf" class="ld-input ld-file" />
+          </div>
+        {% endfor %}
+      </div>
+
+      <div class="ld-form-actions">
+        <button type="submit" class="btn btn-primary">Submit for approval</button>
+        <a href="?tab=listings" data-tab="listings" class="ld-btn ld-btn-edit">Cancel</a>
+      </div>
+    </form>
+  </section>
+
+  {# ---------------- Documents ---------------- #}
+  <section class="ld-panel{% if active_tab == 'documents' %} is-active{% endif %}" data-panel="documents">
+    {% for listing in my_listings %}
+      <article class="ld-doc-card">
+        <div class="ld-doc-head">
+          <h3 class="ld-row-title">{{ listing.title }}</h3>
+          <span class="ld-badge ld-badge-{{ listing.status }}">{{ listing.get_status_display }}</span>
+        </div>
+        <div class="ld-doc-grid">
+          {% for slot in listing.doc_slots %}
+            <div class="ld-doc-slot">
+              <div class="ld-doc-label">{{ slot.label }}</div>
+              {% if slot.doc and slot.doc.file %}
+                <span class="ld-badge ld-badge-{{ slot.doc.status }}">{{ slot.doc.get_status_display }}</span>
+                <a href="{{ slot.doc.file.url }}" target="_blank" rel="noopener" class="ld-doc-link">View file</a>
+              {% else %}
+                <span class="ld-badge ld-badge-none">Not uploaded</span>
+              {% endif %}
+              {% if not slot.doc or slot.doc.status != 'approved' %}
+                <form method="post" action="{% url 'core:landlord_upload_document' listing.pk %}" enctype="multipart/form-data" class="ld-doc-form">
+                  {% csrf_token %}
+                  <input type="hidden" name="doc_type" value="{{ slot.type }}" />
+                  <input type="file" name="file" accept=".jpg,.jpeg,.png,.webp,.pdf" required />
+                  <button type="submit" class="ld-btn ld-btn-view">{% if slot.doc and slot.doc.file %}Replace{% else %}Upload{% endif %}</button>
+                </form>
+              {% endif %}
+            </div>
+          {% endfor %}
+        </div>
+      </article>
+    {% empty %}
+      <div class="ld-empty">
+        <div class="ld-empty-icon">&#128196;</div>
+        <div class="ld-empty-title">No listings to attach documents to</div>
+        <p>Create a listing first, then upload your citizenship, lalpurja and selfie here.</p>
+        <a href="?tab=add" data-tab="add" class="btn btn-primary">&#43; Add Listing</a>
+      </div>
+    {% endfor %}
+  </section>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{{ province_districts|json_script:"province-districts" }}
+<script src="{% static 'js/landlord.js' %}"></script>
+{% endblock %}

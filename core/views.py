@@ -4,10 +4,18 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
 from functools import wraps
 
-from django.db.models import Q
+import os
+
+from django.db import transaction
+from django.db.models import F, Q
+from django.urls import reverse
 from accounts.models import User
-from listings.models import Listing, Advertisement, Favorite, Report
+from listings.models import (
+    Listing, ListingImage, ListingDocument, ListingFacility,
+    Advertisement, Favorite, Report,
+)
 from listings.nepal_data import PROVINCE_DISTRICTS
+from .forms import ListingForm, FacilityForm
 
 from django.core.mail import send_mail
 from django.conf import settings
@@ -88,6 +96,14 @@ def listing_detail(request, pk):
         pk=pk,
         status='approved',
     )
+    # Count a view once per visitor session, and never the owner's own visits.
+    if not (request.user.is_authenticated and request.user == listing.owner):
+        viewed = request.session.get('viewed_listings', [])
+        if pk not in viewed:
+            Listing.objects.filter(pk=pk).update(view_count=F('view_count') + 1)
+            viewed.append(pk)
+            request.session['viewed_listings'] = viewed
+
     is_favorited = False
     phone_revealed = False
     if request.user.is_authenticated and request.user.role == 'tenant':
@@ -167,6 +183,230 @@ def contact(request):
 
     return render(request, 'core/contact.html', {'submitted': submitted})
 
+# ----------------------------------------------------------------------
+# Landlord dashboard
+# ----------------------------------------------------------------------
+
+LANDLORD_TABS = ('listings', 'add', 'documents')
+MAX_IMAGES_PER_LISTING = 8
+MAX_UPLOAD_BYTES = 5 * 1024 * 1024
+IMAGE_EXTS = {'.jpg', '.jpeg', '.png', '.webp'}
+DOC_EXTS = IMAGE_EXTS | {'.pdf'}
+
+
+def landlord_required(view_func):
+    """Like @login_required, but sends non-landlords back to their own dashboard."""
+    @wraps(view_func)
+    @login_required
+    def _wrapped(request, *args, **kwargs):
+        if request.user.role != 'landlord':
+            return redirect('core:dashboard')
+        return view_func(request, *args, **kwargs)
+    return _wrapped
+
+
+def _validate_uploads(files, allowed_exts, check_image=False):
+    """Returns a list of human-readable problems (empty list = all good)."""
+    problems = []
+    for f in files:
+        ext = os.path.splitext(f.name)[1].lower()
+        if ext not in allowed_exts:
+            problems.append(f'"{f.name}": unsupported file type.')
+        elif f.size > MAX_UPLOAD_BYTES:
+            problems.append(f'"{f.name}" is larger than 5 MB.')
+        elif check_image and ext != '.pdf':
+            from PIL import Image
+            try:
+                Image.open(f).verify()
+            except Exception:
+                problems.append(f'"{f.name}" is not a valid image.')
+            finally:
+                f.seek(0)
+    return problems
+
+
+def _save_images(listing, files):
+    has_primary = listing.images.filter(is_primary=True).exists()
+    for index, f in enumerate(files):
+        ListingImage.objects.create(
+            listing=listing,
+            image=f,
+            is_primary=(not has_primary and index == 0),
+        )
+
+
+def _landlord_context(user, active_tab='listings', listing_form=None,
+                      facility_form=None, file_errors=None):
+    listings = list(
+        Listing.objects.filter(owner=user)
+        .prefetch_related('images', 'documents')
+        .order_by('-created_at')
+    )
+    for listing in listings:
+        images = list(listing.images.all())
+        listing.cover = images[0] if images else None
+        docs = {}
+        for doc in listing.documents.all():
+            docs[doc.doc_type] = doc
+        listing.doc_slots = [
+            {'type': code, 'label': label, 'doc': docs.get(code)}
+            for code, label in ListingDocument.DOC_TYPE_CHOICES
+        ]
+
+    stats = {
+        'total': len(listings),
+        'approved': sum(1 for l in listings if l.status == 'approved'),
+        'pending': sum(1 for l in listings if l.status == 'pending'),
+        'views': sum(l.view_count for l in listings),
+    }
+    return {
+        'active_tab': active_tab,
+        'my_listings': listings,
+        'stats': stats,
+        'listing_form': listing_form or ListingForm(initial={'province': 'Bagmati'}),
+        'facility_form': facility_form or FacilityForm(),
+        'file_errors': file_errors or [],
+        'doc_types': ListingDocument.DOC_TYPE_CHOICES,
+        'province_districts': PROVINCE_DISTRICTS,
+        'max_images': MAX_IMAGES_PER_LISTING,
+    }
+
+
+@landlord_required
+@require_POST
+def landlord_add_listing(request):
+    form = ListingForm(request.POST)
+    facility_form = FacilityForm(request.POST)
+    images = request.FILES.getlist('images')
+    docs = {
+        code: request.FILES.get(f'doc_{code}')
+        for code, _ in ListingDocument.DOC_TYPE_CHOICES
+        if request.FILES.get(f'doc_{code}')
+    }
+
+    file_errors = []
+    if not images:
+        file_errors.append('Add at least one photo of the room.')
+    elif len(images) > MAX_IMAGES_PER_LISTING:
+        file_errors.append(f'You can upload up to {MAX_IMAGES_PER_LISTING} photos.')
+    file_errors += _validate_uploads(images, IMAGE_EXTS, check_image=True)
+    file_errors += _validate_uploads(docs.values(), DOC_EXTS, check_image=True)
+
+    if form.is_valid() and facility_form.is_valid() and not file_errors:
+        with transaction.atomic():
+            listing = form.save(commit=False)
+            listing.owner = request.user
+            listing.status = 'pending'
+            listing.save()
+            facility = facility_form.save(commit=False)
+            facility.listing = listing
+            facility.save()
+            _save_images(listing, images)
+            for code, f in docs.items():
+                ListingDocument.objects.create(listing=listing, doc_type=code, file=f)
+        messages.success(
+            request,
+            f'"{listing.title}" was submitted and is pending approval.',
+        )
+        return redirect(f"{reverse('core:dashboard')}?tab=listings")
+
+    context = {'user': request.user}
+    context.update(_landlord_context(
+        request.user, 'add', form, facility_form, file_errors,
+    ))
+    return render(request, 'core/dashboard_landlord.html', context)
+
+
+@landlord_required
+def landlord_edit_listing(request, pk):
+    listing = get_object_or_404(Listing, pk=pk, owner=request.user)
+    listing_title = listing.title
+    facility, _ = ListingFacility.objects.get_or_create(listing=listing)
+    existing_images = list(listing.images.all())
+    file_errors = []
+
+    if request.method == 'POST':
+        form = ListingForm(request.POST, instance=listing)
+        facility_form = FacilityForm(request.POST, instance=facility)
+        new_images = request.FILES.getlist('images')
+        remove_ids = {int(i) for i in request.POST.getlist('remove_images') if i.isdigit()}
+
+        remaining = [img for img in existing_images if img.id not in remove_ids]
+        if len(remaining) + len(new_images) < 1:
+            file_errors.append('A listing needs at least one photo.')
+        if len(remaining) + len(new_images) > MAX_IMAGES_PER_LISTING:
+            file_errors.append(f'A listing can have up to {MAX_IMAGES_PER_LISTING} photos.')
+        file_errors += _validate_uploads(new_images, IMAGE_EXTS, check_image=True)
+
+        if form.is_valid() and facility_form.is_valid() and not file_errors:
+            with transaction.atomic():
+                listing = form.save(commit=False)
+                # A rejected listing goes back into the review queue once fixed.
+                if listing.status == 'rejected':
+                    listing.status = 'pending'
+                    listing.rejection_reason = ''
+                listing.save()
+                facility_form.save()
+                for img in existing_images:
+                    if img.id in remove_ids:
+                        img.image.delete(save=False)
+                        img.delete()
+                _save_images(listing, new_images)
+            messages.success(request, f'"{listing.title}" was updated.')
+            return redirect(f"{reverse('core:dashboard')}?tab=listings")
+    else:
+        form = ListingForm(instance=listing)
+        facility_form = FacilityForm(instance=facility)
+
+    return render(request, 'core/landlord_listing_edit.html', {
+        'user': request.user,
+        'listing': listing,
+        'listing_title': listing_title,
+        'listing_form': form,
+        'facility_form': facility_form,
+        'images': existing_images,
+        'file_errors': file_errors,
+        'province_districts': PROVINCE_DISTRICTS,
+        'max_images': MAX_IMAGES_PER_LISTING,
+    })
+
+
+@landlord_required
+@require_POST
+def landlord_upload_document(request, pk):
+    listing = get_object_or_404(Listing, pk=pk, owner=request.user)
+    doc_type = request.POST.get('doc_type')
+    upload = request.FILES.get('file')
+    back = f"{reverse('core:dashboard')}?tab=documents"
+
+    if doc_type not in dict(ListingDocument.DOC_TYPE_CHOICES):
+        messages.error(request, 'Unknown document type.')
+        return redirect(back)
+    if not upload:
+        messages.error(request, 'Choose a file to upload.')
+        return redirect(back)
+    problems = _validate_uploads([upload], DOC_EXTS, check_image=True)
+    if problems:
+        messages.error(request, problems[0])
+        return redirect(back)
+
+    doc = listing.documents.filter(doc_type=doc_type).first()
+    if doc and doc.status == 'approved':
+        messages.error(request, 'That document is already approved and cannot be replaced.')
+        return redirect(back)
+
+    if doc:
+        if doc.file:
+            doc.file.delete(save=False)
+        doc.file = upload
+        doc.status = 'pending'
+        doc.save()
+    else:
+        ListingDocument.objects.create(listing=listing, doc_type=doc_type, file=upload)
+    messages.success(request, f'{dict(ListingDocument.DOC_TYPE_CHOICES)[doc_type]} uploaded for "{listing.title}".')
+    return redirect(back)
+
+
 def admin_required(view_func):
     """
     Like @login_required, but also bounces non-admins back to their
@@ -203,6 +443,8 @@ def dashboard(request):
 
     if user.role == 'landlord':
         template = 'core/dashboard_landlord.html'
+        tab = request.GET.get('tab', 'listings')
+        context.update(_landlord_context(user, tab if tab in LANDLORD_TABS else 'listings'))
 
     elif user.role == 'admin':
         template = 'core/dashboard_admin.html'

@@ -27,7 +27,7 @@
           <a href="{% url 'core:blog' %}">Blog</a>
           <a href="{% url 'core:contact' %}">Contact</a>
           {% if user.is_authenticated and user.role == 'landlord' %}
-            <a href="#">My Listings</a>
+            <a href="{% url 'core:dashboard' %}">My Listings</a>
           {% endif %}
           {% if user.is_authenticated and user.role == 'admin' %}
             <a href="#">Admin Panel</a>

@@ -79,6 +79,7 @@ class ListingDocument(models.Model):
     )
 
     doc_type = models.CharField(max_length=30, choices=DOC_TYPE_CHOICES)
+    file = models.FileField(upload_to='documents/', blank=True)   # <-- add this line
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
     listing = models.ForeignKey(
         Listing,
