@@ -19,11 +19,30 @@
   <div class="detail-grid">
 
     <div>
-      <div class="detail-image" {% if listing.images.first %}style="background-image:url('{{ listing.images.first.image.url }}'); background-size:cover; background-position:center;"{% endif %}>
-        {% if not listing.images.first %}&#127968;{% endif %}
+      {% with images=listing.images.all %}
+      <div class="detail-image" id="main-gallery-image" {% if images.first %}style="background-image:url('{{ images.first.image.url }}'); background-size:cover; background-position:center;"{% endif %}>
+        {% if not images.first %}&#127968;{% endif %}
         <span class="detail-type-badge">{{ listing.get_room_type_display }}</span>
         <span class="detail-counter">&#10003; Verified</span>
-    </div>
+
+        {% if images|length > 1 %}
+          <button type="button" class="gallery-nav-btn prev" id="gallery-prev">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          </button>
+          <button type="button" class="gallery-nav-btn next" id="gallery-next">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+        {% endif %}
+      </div>
+
+      {% if images|length > 1 %}
+        <div class="gallery-thumbs" id="gallery-thumbs">
+          {% for img in images %}
+            <div class="gallery-thumb {% if forloop.first %}active{% endif %}" style="background-image:url('{{ img.image.url }}');" data-url="{{ img.image.url }}"></div>
+          {% endfor %}
+        </div>
+      {% endif %}
+      {% endwith %}
 
       <div class="detail-card">
         <h2>Description</h2>
@@ -31,10 +50,34 @@
       </div>
 
       <div class="detail-card">
+        <h2>Pricing</h2>
+        <div class="detail-meta-row" style="border-top:none; padding-top:0;">
+          <span>Monthly Rent</span>
+          <span>NPR {{ listing.price }}</span>
+        </div>
+        <div class="detail-meta-row">
+          <span>Security Deposit</span>
+          <span>NPR {{ listing.security_deposit }}</span>
+        </div>
+        {% if listing.bills_water or listing.bills_electricity or listing.bills_internet %}
+          <div class="detail-meta-row" style="border-bottom:none;">
+            <span>Bills Included</span>
+            <span>
+              {% if listing.bills_water %}Water{% endif %}
+              {% if listing.bills_electricity %}{% if listing.bills_water %}, {% endif %}Electricity{% endif %}
+              {% if listing.bills_internet %}{% if listing.bills_water or listing.bills_electricity %}, {% endif %}Internet{% endif %}
+            </span>
+          </div>
+        {% endif %}
+      </div>
+
+      <div class="detail-card">
         <h2>Location</h2>
         <p class="detail-location-text">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-          {{ listing.location }}, {{ listing.get_province_display }}
+          {% if listing.exact_address %}{{ listing.exact_address }}, {% endif %}
+          {{ listing.location }}{% if listing.district %}, {{ listing.district }}{% endif %}, {{ listing.get_province_display }}
+          {% if listing.ward_number %} &mdash; Ward {{ listing.ward_number }}{% endif %}
         </p>
         <div class="detail-map-placeholder">
           &#128506;
@@ -46,15 +89,17 @@
     <div class="detail-sidebar">
       <div class="detail-price">NPR {{ listing.price }}</div>
       <div class="detail-price-label">per month</div>
-       {% if user.is_authenticated and user.role == 'tenant' %}
-  <form method="post" action="{% url 'core:toggle_favorite' listing.pk %}" style="margin-bottom:16px;">
-    {% csrf_token %}
-    <input type="hidden" name="next" value="{{ request.get_full_path }}">
-    <button type="submit" class="btn {% if is_favorited %}btn-primary{% else %}btn-ghost{% endif %}" style="width:100%; justify-content:center; padding:10px; border:1px solid var(--color-rule);">
-      {% if is_favorited %}&#10084; Saved{% else %}&#9825; Save to Favourites{% endif %}
-    </button>
-  </form>
-{% endif %}
+
+      {% if user.is_authenticated and user.role == 'tenant' %}
+        <form method="post" action="{% url 'core:toggle_favorite' listing.pk %}" style="margin-bottom:16px;">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.get_full_path }}">
+          <button type="submit" class="btn {% if is_favorited %}btn-primary{% else %}btn-ghost{% endif %}" style="width:100%; justify-content:center; padding:10px; border:1px solid var(--color-rule);">
+            {% if is_favorited %}&#10084; Saved{% else %}&#9825; Save to Favourites{% endif %}
+          </button>
+        </form>
+      {% endif %}
+
       <div class="detail-meta-row">
         <span>Posted</span>
         <span>{{ listing.created_at|timesince }} ago</span>
@@ -71,25 +116,25 @@
 
       {% if user.is_authenticated and user.role == 'tenant' %}
         <div class="phone-reveal-box" id="phone-reveal-box">
-           {% if phone_revealed %}
-              <div class="phone-revealed">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-                  {{ listing.owner.phone }}
-              </div>
+          {% if phone_revealed %}
+            <div class="phone-revealed">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+              {{ listing.owner.phone }}
+            </div>
           {% else %}
-              <div class="phone-masked" id="phone-masked">98XXXXXXXX</div>
-              <button type="button" class="btn btn-primary reveal-btn" id="reveal-phone-btn" data-url="{% url 'core:reveal_phone' listing.pk %}">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-                   Reveal Contact Number
-              </button>
-              <p class="reveal-note">Watch a short ad to reveal the number</p>
+            <div class="phone-masked" id="phone-masked">98XXXXXXXX</div>
+            <button type="button" class="btn btn-primary reveal-btn" id="reveal-phone-btn" data-url="{% url 'core:reveal_phone' listing.pk %}">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+              Reveal Contact Number
+            </button>
+            <p class="reveal-note">Watch a short ad to reveal the number</p>
           {% endif %}
         </div>
-     {% elif user.is_authenticated %}
-         <a href="#" class="btn btn-primary" style="width:100%; justify-content:center; padding:12px;">Contact Landlord</a>
-     {% else %}
+      {% elif user.is_authenticated %}
+        <a href="#" class="btn btn-primary" style="width:100%; justify-content:center; padding:12px;">Contact Landlord</a>
+      {% else %}
         <a href="{% url 'accounts:login' %}" class="btn btn-primary" style="width:100%; justify-content:center; padding:12px;">Log In to Contact</a>
-     {% endif %}
+      {% endif %}
 
       <div class="safety-card">
         <span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></span>
@@ -98,13 +143,16 @@
           Always visit the property in person before making any payment, and never send a deposit without seeing it first.
         </div>
       </div>
+
       <span class="report-link" id="open-report-modal">
-         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg>
-         Report this listing
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg>
+        Report this listing
       </span>
     </div>
+
   </div>
 </div>
+
 {% if user.is_authenticated %}
 <div class="report-modal-overlay" id="report-modal-overlay">
   <div class="report-modal">
@@ -141,7 +189,8 @@
       if (e.target === overlay) overlay.classList.remove('open');
     });
   }
-    var revealBtn = document.getElementById('reveal-phone-btn');
+
+  var revealBtn = document.getElementById('reveal-phone-btn');
   if (revealBtn) {
     revealBtn.addEventListener('click', function () {
       var box = document.getElementById('phone-reveal-box');
@@ -162,6 +211,34 @@
           });
       }, 5000);
     });
+  }
+
+  var thumbs = document.querySelectorAll('.gallery-thumb');
+  var mainImage = document.getElementById('main-gallery-image');
+  var prevBtn = document.getElementById('gallery-prev');
+  var nextBtn = document.getElementById('gallery-next');
+
+  if (thumbs.length && mainImage) {
+    var currentIndex = 0;
+
+    function showImage(index) {
+      if (index < 0) index = thumbs.length - 1;
+      if (index >= thumbs.length) index = 0;
+      currentIndex = index;
+
+      var url = thumbs[currentIndex].dataset.url;
+      mainImage.style.backgroundImage = "url('" + url + "')";
+
+      thumbs.forEach(function (t) { t.classList.remove('active'); });
+      thumbs[currentIndex].classList.add('active');
+    }
+
+    thumbs.forEach(function (thumb, index) {
+      thumb.addEventListener('click', function () { showImage(index); });
+    });
+
+    if (prevBtn) prevBtn.addEventListener('click', function () { showImage(currentIndex - 1); });
+    if (nextBtn) nextBtn.addEventListener('click', function () { showImage(currentIndex + 1); });
   }
 </script>
 {% endblock %}

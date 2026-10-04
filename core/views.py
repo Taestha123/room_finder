@@ -7,6 +7,7 @@ from functools import wraps
 from django.db.models import Q
 from accounts.models import User
 from listings.models import Listing, Advertisement, Favorite, Report
+from listings.nepal_data import PROVINCE_DISTRICTS
 
 from django.core.mail import send_mail
 from django.conf import settings
@@ -17,7 +18,9 @@ def home(request):
 
     query = request.GET.get('q', '').strip()
     province = request.GET.get('province', '')
-    room_type = request.GET.get('room_type', '')
+    district = request.GET.get('district', '')
+    room_types = request.GET.getlist('room_type')
+    facility_filters = request.GET.getlist('facility')
     min_price = request.GET.get('min_price', '')
     max_price = request.GET.get('max_price', '')
     sort_by = request.GET.get('sort', 'latest')
@@ -26,8 +29,26 @@ def home(request):
         listings = listings.filter(Q(title__icontains=query) | Q(location__icontains=query))
     if province:
         listings = listings.filter(province=province)
-    if room_type:
-        listings = listings.filter(room_type=room_type)
+    if district:
+        listings = listings.filter(district=district)
+    if room_types:
+        listings = listings.filter(room_type__in=room_types)
+
+    if facility_filters:
+        facility_field_map = {
+            'car_parking': 'facility__car_parking',
+            'bike_parking': 'facility__bike_parking',
+            'wifi': 'facility__wifi',
+            'drinking_water': 'facility__drinking_water',
+            'water_24_7': 'facility__water_24_7',
+            'attached_bathroom': 'facility__attached_bathroom',
+            'kitchen': 'facility__kitchen',
+            'pet_allowed': 'facility__pet_allowed',
+        }
+        for key in facility_filters:
+            field = facility_field_map.get(key)
+            if field:
+                listings = listings.filter(**{field: True})
     if min_price:
         listings = listings.filter(price__gte=min_price)
     if max_price:
@@ -52,10 +73,12 @@ def home(request):
         'room_type_choices': Listing.ROOM_TYPE_CHOICES,
         'query': query,
         'selected_province': province,
-        'selected_room_type': room_type,
+        'selected_room_types': room_types,
+        'selected_facilities': facility_filters,
         'min_price': min_price,
         'max_price': max_price,
         'selected_sort': sort_by,
+        'province_districts_json': PROVINCE_DISTRICTS,
     }
     return render(request, 'core/home.html', context)
 

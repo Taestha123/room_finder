@@ -62,30 +62,33 @@
       </div>
 
       <div class="filter-group">
-        <label class="filter-group-label">Province</label>
-        <select name="province">
-          <option value="">All Provinces</option>
-          {% for code, label in province_choices %}
-            <option value="{{ code }}" {% if selected_province == code %}selected{% endif %}>{{ label }}</option>
-          {% endfor %}
-        </select>
-      </div>
+  <label class="filter-group-label">Province</label>
+  <select name="province" id="province-select">
+    <option value="">All Provinces</option>
+    {% for code, label in province_choices %}
+      <option value="{{ code }}" {% if selected_province == code %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+</div>
 
-      <div class="filter-group">
-        <label class="filter-group-label">Property Type</label>
-        <div class="property-pills">
-          <label class="property-pill">
-            <input type="radio" name="room_type" value="" {% if not selected_room_type %}checked{% endif %}>
-            All
-          </label>
-          {% for code, label in room_type_choices %}
-            <label class="property-pill">
-              <input type="radio" name="room_type" value="{{ code }}" {% if selected_room_type == code %}checked{% endif %}>
-              {{ label }}
-            </label>
-          {% endfor %}
-        </div>
-      </div>
+<div class="filter-group">
+  <label class="filter-group-label">District</label>
+  <select name="district" id="district-select">
+    <option value="">All Districts</option>
+  </select>
+</div>
+
+     <div class="filter-group">
+  <label class="filter-group-label">Property Type</label>
+  <div class="property-pills">
+    {% for code, label in room_type_choices %}
+      <label class="property-pill">
+        <input type="checkbox" name="room_type" value="{{ code }}" {% if code in selected_room_types %}checked{% endif %}>
+        {{ label }}
+      </label>
+    {% endfor %}
+  </div>
+</div>
 
       <div class="filter-group">
         <label class="filter-group-label">Price Range (NPR)</label>
@@ -95,6 +98,20 @@
           <input type="number" name="max_price" placeholder="Max" value="{{ max_price }}">
         </div>
       </div>
+
+      <div class="filter-group">
+  <label class="filter-group-label">Facilities</label>
+  <div class="facility-checkboxes">
+    <label><input type="checkbox" name="facility" value="wifi" {% if 'wifi' in selected_facilities %}checked{% endif %}> WiFi</label>
+    <label><input type="checkbox" name="facility" value="car_parking" {% if 'car_parking' in selected_facilities %}checked{% endif %}> Car Parking</label>
+    <label><input type="checkbox" name="facility" value="bike_parking" {% if 'bike_parking' in selected_facilities %}checked{% endif %}> Bike Parking</label>
+    <label><input type="checkbox" name="facility" value="attached_bathroom" {% if 'attached_bathroom' in selected_facilities %}checked{% endif %}> Attached Bathroom</label>
+    <label><input type="checkbox" name="facility" value="kitchen" {% if 'kitchen' in selected_facilities %}checked{% endif %}> Kitchen</label>
+    <label><input type="checkbox" name="facility" value="drinking_water" {% if 'drinking_water' in selected_facilities %}checked{% endif %}> Drinking Water</label>
+    <label><input type="checkbox" name="facility" value="water_24_7" {% if 'water_24_7' in selected_facilities %}checked{% endif %}> 24/7 Water Supply</label>
+    <label><input type="checkbox" name="facility" value="pet_allowed" {% if 'pet_allowed' in selected_facilities %}checked{% endif %}> Pet Allowed</label>
+  </div>
+</div>
 
       <button type="submit" class="btn btn-primary" style="width:100%; justify-content:center; padding:10px;">Apply Filters</button>
     </aside>
@@ -136,6 +153,7 @@
               <div class="room-card-body">
                 <p class="room-card-title">{{ listing.title }}</p>
                 <p class="room-card-location">{{ listing.location }}, {{ listing.get_province_display }}</p>
+                <p class="room-card-desc">{{ listing.description|truncatechars:100 }}</p>
                 <div class="room-card-footer">
                   <span class="room-card-price">NPR {{ listing.price }}/mo</span>
                   <a href="{% url 'core:listing_detail' listing.pk %}" class="btn btn-primary" style="padding:6px 14px; font-size:13px;">View</a>
@@ -162,5 +180,34 @@
     layout.classList.toggle('filters-hidden');
     toggleLabel.textContent = layout.classList.contains('filters-hidden') ? 'Show Filters' : 'Hide Filters';
   });
+</script>
+{{ province_districts_json|json_script:"province-districts-data" }}
+<script>
+  (function () {
+    var provinceDistricts = JSON.parse(document.getElementById('province-districts-data').textContent);
+    var provinceSelect = document.getElementById('province-select');
+    var districtSelect = document.getElementById('district-select');
+    var selectedDistrict = "{{ request.GET.district|default:'' }}";
+
+    function populateDistricts(province, preselect) {
+      districtSelect.innerHTML = '<option value="">All Districts</option>';
+      var districts = provinceDistricts[province] || [];
+      districts.forEach(function (district) {
+        var opt = document.createElement('option');
+        opt.value = district;
+        opt.textContent = district;
+        if (district === preselect) opt.selected = true;
+        districtSelect.appendChild(opt);
+      });
+    }
+
+    if (provinceSelect.value) {
+      populateDistricts(provinceSelect.value, selectedDistrict);
+    }
+
+    provinceSelect.addEventListener('change', function () {
+      populateDistricts(provinceSelect.value, null);
+    });
+  })();
 </script>
 {% endblock %}

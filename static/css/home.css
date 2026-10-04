@@ -396,3 +396,23 @@
 .save-heart-btn.is-saved svg {
   fill: var(--color-brand);
 }
+
+.facility-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.facility-checkboxes label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.facility-checkboxes input { accent-color: var(--color-brand); }
+.room-card-desc {
+  font-size: 12px;
+  color: var(--color-ink-soft);
+  line-height: 1.5;
+  margin-bottom: 10px;
+}

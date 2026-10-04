@@ -34,7 +34,18 @@ class Listing(models.Model):
     room_type = models.CharField(max_length=20, choices=ROOM_TYPE_CHOICES, default='single')
     location = models.CharField(max_length=200, help_text='e.g. Kathmandu, Lalitpur')
     province = models.CharField(max_length=20, choices=PROVINCE_CHOICES, default='Bagmati')
+    district = models.CharField(max_length=100, blank=True)
+    ward_number = models.CharField(max_length=10, blank=True)
+    exact_address = models.CharField(max_length=255, blank=True)
     price = models.PositiveIntegerField(help_text='Monthly rent in NPR')
+    security_deposit = models.PositiveIntegerField(default=0)
+    bills_water = models.BooleanField(default=False)
+    bills_electricity = models.BooleanField(default=False)
+    bills_internet = models.BooleanField(default=False)
+    available_from = models.DateField(null=True, blank=True)
+    house_rules = models.TextField(blank=True)
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
     rejection_reason = models.CharField(max_length=255, blank=True)
     view_count = models.PositiveIntegerField(default=0)
@@ -165,3 +176,28 @@ class Report(models.Model):
 
     def __str__(self):
         return f'Report on {self.listing.title} by {self.reporter.email}'
+
+class ListingFacility(models.Model):
+    FURNISHED_CHOICES = (
+        ('furnished', 'Furnished'),
+        ('unfurnished', 'Unfurnished'),
+        ('semi', 'Semi-Furnished'),
+    )
+
+    listing = models.OneToOneField(Listing, on_delete=models.CASCADE, related_name='facility')
+    furnished_status = models.CharField(max_length=15, choices=FURNISHED_CHOICES, default='unfurnished')
+    car_parking = models.BooleanField(default=False)
+    bike_parking = models.BooleanField(default=False)
+    wifi = models.BooleanField(default=False)
+    drinking_water = models.BooleanField(default=False)
+    water_24_7 = models.BooleanField(default=False)
+    attached_bathroom = models.BooleanField(default=False)
+    kitchen = models.BooleanField(default=False)
+    balcony = models.BooleanField(default=False)
+    cctv = models.BooleanField(default=False)
+    security_guard = models.BooleanField(default=False)
+    pet_allowed = models.BooleanField(default=False)
+    laundry = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f'Facilities for {self.listing.title}'  
