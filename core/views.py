@@ -177,7 +177,7 @@ def contact(request):
             subject=f"[Contact Form] {subject or 'General'} — from {full_name}",
             message=f"From: {full_name} ({email})\n\n{message}",
             from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=['nehabasnet77.xdezo@gmail.com'],
+            recipient_list=[settings.CONTACT_RECEIVER_EMAIL],
         )
         submitted = True
 
