@@ -1,8 +1,14 @@
-{% extends 'base.html' %} {% block footer %}{% endblock %} {% load static %} {% block title %}My Listings — Room
-Finder{% endblock %} {% block extra_css %}
-<link rel="stylesheet" href="{% static 'css/dashboard.css' %}" />
-{% endblock %} {% block content %}
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Landlord Dashboard — Room Finder{% endblock %}
+{% block footer %}{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+<link rel="stylesheet" href="{% static 'css/landlord.css' %}">
+{% endblock %}
+
+{% block content %}
 <div class="container dash-header">
   <div class="dash-header-inner">
     <div>
@@ -10,114 +16,264 @@ Finder{% endblock %} {% block extra_css %}
       <h1 class="dash-title">Welcome back, {{ user.first_name }} &#128075;</h1>
       <p class="dash-subtitle">Manage your rooms and track tenant interest.</p>
     </div>
-    <a href="#" class="btn btn-primary">&#43; Add New Listing</a>
+    <a href="?tab=add" data-tab="add" class="btn btn-primary">+ Add New Listing</a>
   </div>
 </div>
 
 <div class="container dash-section">
   <div class="stat-grid">
-    <div class="stat-card">
-      <div class="stat-icon brand">&#127968;</div>
-      <div class="stat-value">0</div>
-      <div class="stat-label">Active Listings</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon gold">&#128065;</div>
-      <div class="stat-value">0</div>
-      <div class="stat-label">Total Views</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon leaf">&#128172;</div>
-      <div class="stat-value">0</div>
-      <div class="stat-label">New Inquiries</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon saffron">&#128200;</div>
-      <div class="stat-value">&mdash;</div>
-      <div class="stat-label">Occupancy Rate</div>
-    </div>
+    <div class="stat-card"><div class="stat-icon brand">&#127968;</div><div class="stat-value">{{ stats.approved }}</div><div class="stat-label">Active Listings</div></div>
+    <div class="stat-card"><div class="stat-icon gold">&#128065;</div><div class="stat-value">{{ stats.views }}</div><div class="stat-label">Total Views</div></div>
+    <div class="stat-card"><div class="stat-icon leaf">&#128172;</div><div class="stat-value">0</div><div class="stat-label">New Inquiries</div></div>
+    <div class="stat-card"><div class="stat-icon saffron">&#128200;</div><div class="stat-value">&mdash;</div><div class="stat-label">Occupancy Rate</div></div>
   </div>
 </div>
 
 <div class="container dash-section">
-  <div class="dash-layout">
-    <div>
-      <div class="dash-section-head">
-        <div class="dash-section-title">My Listings</div>
-        <a href="#" class="dash-link">Manage all &rarr;</a>
-      </div>
+  <nav class="ld-tabs">
+    <a href="?tab=listings" data-tab="listings" class="ld-tab{% if active_tab == 'listings' %} is-active{% endif %}">My Listings</a>
+    <a href="?tab=add" data-tab="add" class="ld-tab{% if active_tab == 'add' %} is-active{% endif %}">+ Add Listing</a>
+    <a href="?tab=documents" data-tab="documents" class="ld-tab{% if active_tab == 'documents' %} is-active{% endif %}">Documents</a>
+  </nav>
 
-      <div class="empty-state">
-        <div class="empty-state-icon">&#127968;</div>
-        <div class="empty-state-title">You haven't listed any rooms yet</div>
-        <div class="empty-state-sub">
-          Add your first room to start reaching verified tenants in your area.
+  <section class="ld-panel{% if active_tab == 'listings' %} is-active{% endif %}" data-panel="listings">
+    {% for listing in my_listings %}
+    <article class="ld-row">
+      <div class="ld-thumb"{% if listing.cover %} style="background-image:url('{{ listing.cover.image.url }}')"{% endif %}>{% if not listing.cover %}&#127968;{% endif %}</div>
+      <div class="ld-info">
+        <h3 class="ld-row-title">{{ listing.title }}</h3>
+        <p class="ld-meta">{{ listing.city_vdc }} · {{ listing.location }} · {{ listing.get_room_type_display }}</p>
+        <p class="ld-price">NPR {{ listing.price|floatformat:"0g" }}/month</p>
+        {% if listing.status == 'rejected' and listing.rejection_reason %}<p class="ld-reject">Rejected: {{ listing.rejection_reason }}</p>{% endif %}
+      </div>
+      <div class="ld-side">
+        <span class="ld-badge ld-badge-{{ listing.status }}">{{ listing.get_status_display }}</span>
+        <div class="ld-actions">
+          <a href="{% url 'core:landlord_edit_listing' listing.pk %}" class="ld-btn ld-btn-edit">Edit</a>
+          {% if listing.status == 'approved' %}
+          <a href="{% url 'core:listing_detail' listing.pk %}" class="ld-btn ld-btn-view">View</a>
+          {% else %}
+          <span class="ld-btn ld-btn-view is-disabled">Pending approval</span>
+          {% endif %}
         </div>
-        <a href="#" class="btn btn-primary">&#43; Add New Listing</a>
       </div>
-
-      <!--
-        Once the listings app has a model + queryset wired in, swap the empty-state
-        above for a table like this:
-
-        <table class="dash-table">
-          <thead>
-            <tr><th>Room</th><th>Location</th><th>Price</th><th>Status</th><th>Views</th></tr>
-          </thead>
-          <tbody>
-            {% for listing in listings %}
-            <tr>
-              <td>{{ listing.title }}</td>
-              <td>{{ listing.location }}</td>
-              <td>Rs {{ listing.price }}</td>
-              <td><span class="badge">{{ listing.status }}</span></td>
-              <td>{{ listing.view_count }}</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      -->
+    </article>
+    {% empty %}
+    <div class="ld-empty">
+      <div class="ld-empty-icon">&#127968;</div>
+      <div class="ld-empty-title">You haven't listed any rooms yet</div>
+      <p>Add your first room to start reaching verified tenants.</p>
+      <a href="?tab=add" data-tab="add" class="btn btn-primary">+ Add Listing</a>
     </div>
+    {% endfor %}
+  </section>
 
-    <div>
-      <div class="dash-section-head">
-        <div class="dash-section-title">Recent Inquiries</div>
+  <section class="ld-panel{% if active_tab == 'add' %} is-active{% endif %}" data-panel="add">
+    <form method="post" action="{% url 'core:landlord_add_listing' %}" enctype="multipart/form-data" class="ld-form listing-wizard">
+      {% csrf_token %}
+
+      {% if file_errors or listing_form.errors or facility_form.errors %}
+      <div class="ld-alert">
+        <strong>Please fix the following:</strong>
+        {% for error in file_errors %}<div>{{ error }}</div>{% endfor %}
+        {{ listing_form.non_field_errors }}
+        {{ facility_form.non_field_errors }}
       </div>
-      <div class="side-card">
-        <div class="empty-state" style="border: none; padding: 20px 8px">
-          <div class="empty-state-icon">&#128172;</div>
-          <div class="empty-state-title">No inquiries yet</div>
-          <div class="empty-state-sub">
-            Tenant messages about your rooms will show up here.
+      {% endif %}
+
+      <div class="listing-stepper">
+        <div class="listing-step is-active" data-step="1"><span class="listing-step-number">1</span><small>Basic Info</small></div>
+        <div class="listing-step" data-step="2"><span class="listing-step-number">2</span><small>Location</small></div>
+        <div class="listing-step" data-step="3"><span class="listing-step-number">3</span><small>Pricing</small></div>
+        <div class="listing-step" data-step="4"><span class="listing-step-number">4</span><small>Facilities</small></div>
+        <div class="listing-step" data-step="5"><span class="listing-step-number">5</span><small>Review</small></div>
+      </div>
+
+      <!-- STEP 1: BASIC INFORMATION -->
+      <div class="listing-wizard-page active" data-page="1">
+        <h2>Basic Information</h2>
+        <div class="ld-grid">
+          {% include 'core/_ld_field.html' with field=listing_form.title wide=True %}
+          {% include 'core/_ld_field.html' with field=listing_form.room_type wide=True %}
+          {% include 'core/_ld_field.html' with field=listing_form.description wide=True %}
+        </div>
+        <div class="listing-wizard-actions">
+          <span></span>
+          <button type="button" class="ld-btn ld-btn-view" data-next>Next →</button>
+        </div>
+      </div>
+
+      <!-- STEP 2: LOCATION -->
+      <div class="listing-wizard-page" data-page="2" hidden>
+        <h2>Location</h2>
+        <div class="ld-grid">
+          {% include 'core/_ld_field.html' with field=listing_form.province %}
+          {% include 'core/_ld_field.html' with field=listing_form.district %}
+          {% include 'core/_ld_field.html' with field=listing_form.city_vdc %}
+          {% include 'core/_ld_field.html' with field=listing_form.location %}
+          {% include 'core/_ld_field.html' with field=listing_form.ward_number %}
+          {% include 'core/_ld_field.html' with field=listing_form.exact_address wide=True %}
+
+          <div class="ld-field ld-wide map-pin-field">
+            <label for="google_maps_pin">📍 Google Maps Pin</label>
+            <input type="text" id="google_maps_pin" class="ld-input" placeholder="Paste Google Maps link or latitude, longitude">
+            <small>Paste a Google Maps share link for the property's pin. Coordinates are saved automatically.</small>
+            <span id="map-pin-status" class="map-pin-status" aria-live="polite"></span>
+            {{ listing_form.latitude }}
+            {{ listing_form.longitude }}
           </div>
         </div>
+        <div class="listing-wizard-actions">
+          <button type="button" class="ld-btn ld-btn-edit" data-back>← Previous</button>
+          <button type="button" class="ld-btn ld-btn-view" data-next>Next →</button>
+        </div>
       </div>
 
-      <div class="side-card" style="margin-top: 16px">
-        <div class="side-card-title">Your Profile</div>
-        <p
-          style="font-size: 13px; color: var(--color-ink-soft); margin: 0 0 4px"
-        >
-          {{ user.get_full_name }}
-        </p>
-        <p
-          style="font-size: 13px; color: var(--color-ink-soft); margin: 0 0 4px"
-        >
-          {{ user.email }}
-        </p>
-        <p
-          style="
-            font-size: 13px;
-            color: var(--color-ink-soft);
-            margin: 0 0 12px;
-          "
-        >
-          {{ user.phone }}
-        </p>
-        <span class="role-pill">{{ user.role }}</span>
+      <!-- STEP 3: PRICING -->
+      <div class="listing-wizard-page" data-page="3" hidden>
+        <h2>Pricing</h2>
+        <div class="ld-grid">
+          {% include 'core/_ld_field.html' with field=listing_form.price %}
+          {% include 'core/_ld_field.html' with field=listing_form.security_deposit %}
+          {% include 'core/_ld_field.html' with field=listing_form.available_from %}
+        </div>
+
+        <h3 class="ld-form-heading">Bills Included in Rent</h3>
+        <div class="ld-checks">
+          <label class="ld-check">💧 {{ listing_form.bills_water }} Water</label>
+          <label class="ld-check">⚡ {{ listing_form.bills_electricity }} Electricity</label>
+          <label class="ld-check">🌐 {{ listing_form.bills_internet }} Internet</label>
+        </div>
+
+        <div class="listing-wizard-actions">
+          <button type="button" class="ld-btn ld-btn-edit" data-back>← Previous</button>
+          <button type="button" class="ld-btn ld-btn-view" data-next>Next →</button>
+        </div>
       </div>
+
+      <!-- STEP 4: FACILITIES -->
+      <div class="listing-wizard-page" data-page="4" hidden>
+        <h2>Facilities & Rules</h2>
+
+        <div class="ld-field ld-wide">
+          <label for="{{ facility_form.furnished_status.id_for_label }}">🛋️ Furnished</label>
+          {{ facility_form.furnished_status }}
+          {{ facility_form.furnished_status.errors }}
+          <small>Choose Furnished, Semi-Furnished, or Unfurnished.</small>
+        </div>
+
+        <h3 class="ld-form-heading">Available Facilities</h3>
+        <div class="ld-grid ld-facility-grid">
+          {% for field in facility_form.checkbox_fields %}
+            <label class="ld-check">{{ field }} <span>{{ field.label }}</span></label>
+          {% endfor %}
+        </div>
+
+        {% include 'core/_ld_field.html' with field=listing_form.house_rules wide=True %}
+
+        <div class="listing-wizard-actions">
+          <button type="button" class="ld-btn ld-btn-edit" data-back>← Previous</button>
+          <button type="button" class="ld-btn ld-btn-view" data-next>Next →</button>
+        </div>
+      </div>
+
+      <!-- STEP 5: REVIEW -->
+      <div class="listing-wizard-page" data-page="5" hidden>
+        <h2>Review Entered Information</h2>
+
+        <div class="listing-review-card">
+          <h3>Basic Information</h3>
+          <p>Title: <strong data-review="title">—</strong></p>
+          <p>Property type: <strong data-review="room_type">—</strong></p>
+          <p>Description: <strong data-review="description">—</strong></p>
+        </div>
+
+        <div class="listing-review-card">
+          <h3>Location</h3>
+          <p>Province: <strong data-review="province">—</strong></p>
+          <p>District: <strong data-review="district">—</strong></p>
+          <p>City / VDC: <strong data-review="city_vdc">—</strong></p>
+          <p>Area / Tole: <strong data-review="location">—</strong></p>
+          <p>Ward Number: <strong data-review="ward_number">—</strong></p>
+          <p>Exact Address: <strong data-review="exact_address">—</strong></p>
+          <p>Google Maps Pin: <strong id="review-map-pin">—</strong></p>
+        </div>
+
+        <div class="listing-review-card">
+          <h3>Pricing</h3>
+          <p>Monthly Rent: NPR <strong data-review="price">—</strong></p>
+          <p>Security Deposit: NPR <strong data-review="security_deposit">—</strong></p>
+          <p>Available From: <strong data-review="available_from">—</strong></p>
+          <p>Bills included: <strong id="review-bills">—</strong></p>
+        </div>
+
+        <div class="listing-review-card">
+          <h3>Facilities & Rules</h3>
+          <p>Furnishing: <strong data-review-facility="furnished_status">—</strong></p>
+          <p>Facilities: <strong id="review-facilities">—</strong></p>
+          <p>House Rules: <strong data-review="house_rules">—</strong></p>
+        </div>
+
+        <h3 class="ld-form-heading">Upload Property Photos <span class="ld-req">*</span></h3>
+        <div class="ld-field ld-wide">
+          <input type="file" name="images" accept=".jpg,.jpeg,.png,.webp" multiple required class="ld-input ld-file">
+          <small>Upload up to {{ max_images }} photos, 5 MB each. The first photo becomes the cover.</small>
+        </div>
+
+        <div class="listing-wizard-actions">
+          <button type="button" class="ld-btn ld-btn-edit" data-back>← Previous</button>
+          <button type="submit" class="ld-btn ld-btn-view">Submit for Approval</button>
+        </div>
+      </div>
+    </form>
+  </section>
+
+  <!-- DOCUMENTS -->
+  <section class="ld-panel{% if active_tab == 'documents' %} is-active{% endif %}" data-panel="documents">
+    {% for listing in my_listings %}
+    <article class="ld-doc-card">
+      <div class="ld-doc-head">
+        <h3 class="ld-row-title">{{ listing.title }}</h3>
+        <span class="ld-badge ld-badge-{{ listing.status }}">{{ listing.get_status_display }}</span>
+      </div>
+
+      <div class="ld-doc-grid">
+        {% for slot in listing.doc_slots %}
+        <div class="ld-doc-slot">
+          <div class="ld-doc-label">{{ slot.label }}</div>
+
+          {% if slot.doc and slot.doc.file %}
+            <span class="ld-badge ld-badge-{{ slot.doc.status }}">{{ slot.doc.get_status_display }}</span>
+            <a href="{{ slot.doc.file.url }}" target="_blank" class="ld-doc-link">View file</a>
+          {% else %}
+            <span class="ld-badge ld-badge-none">Not uploaded</span>
+          {% endif %}
+
+          {% if not slot.doc or slot.doc.status != 'approved' %}
+          <form method="post" action="{% url 'core:landlord_upload_document' listing.pk %}" enctype="multipart/form-data" class="ld-doc-form">
+            {% csrf_token %}
+            <input type="hidden" name="doc_type" value="{{ slot.type }}">
+            <input type="file" name="file" accept=".jpg,.jpeg,.png,.webp,.pdf" required>
+            <button type="submit" class="ld-btn ld-btn-view">Upload / Replace</button>
+          </form>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+    </article>
+    {% empty %}
+    <div class="ld-empty">
+      <div class="ld-empty-icon">&#128196;</div>
+      <div class="ld-empty-title">No listings yet</div>
+      <p>Create a listing first to upload verification documents.</p>
+      <a href="?tab=add" data-tab="add" class="btn btn-primary">+ Add Listing</a>
     </div>
-  </div>
+    {% endfor %}
+  </section>
 </div>
+{% endblock %}
 
+{% block extra_js %}
+{{ province_districts|json_script:"province-districts" }}
+<script src="{% static 'js/landlord.js' %}"></script>
 {% endblock %}

@@ -134,6 +134,227 @@ textarea.ld-input { resize: vertical; }
 .ld-doc-form input[type=file] { font-size: 12px; width: 100%; }
 .ld-doc-form .ld-btn { padding: 7px 14px; }
 
+```css
+/* Add Listing Wizard */
+.listing-stepper {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 10px 0 35px;
+  padding: 22px 12px;
+  background: #f7f2ec;
+  border-radius: 12px;
+}
+
+.listing-step {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.listing-step span {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border: 2px solid #e5d9cf;
+  border-radius: 50%;
+  background: white;
+  color: #777;
+  font-weight: 700;
+}
+
+.listing-step small {
+  color: #777;
+  font-size: 12px;
+}
+
+.listing-step.active span,
+.listing-step.completed span {
+  background: #c93627;
+  border-color: #c93627;
+  color: white;
+}
+
+.listing-step.active small {
+  color: #c93627;
+  font-weight: 700;
+}
+
+/* ===== ADD LISTING WIZARD FIX ===== */
+
+.listing-stepper {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+    gap: 5px;
+    padding: 20px 10px;
+    margin-bottom: 30px;
+}
+
+.listing-step {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 8px;
+}
+
+.listing-step .listing-step-number {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 2px solid #ddd;
+    border-radius: 50%;
+    background: white;
+    color: #777;
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.listing-step.is-active .listing-step-number,
+.listing-step.is-complete .listing-step-number {
+    background: #c93627;
+    border-color: #c93627;
+    color: white;
+}
+
+.listing-step.is-active small {
+    color: #c93627;
+    font-weight: 700;
+}
+
+.listing-step.is-complete small {
+    color: #333;
+}
+
+.listing-step small {
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.listing-wizard-page[hidden] {
+    display: none !important;
+}
+
+.listing-wizard-page.active {
+    display: block;
+}
+
+.listing-wizard-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-top: 30px;
+}
+
+.listing-wizard-actions button {
+    cursor: pointer;
+}
+
+@media (max-width: 600px) {
+    .listing-stepper {
+        gap: 2px;
+        padding: 15px 3px;
+    }
+
+    .listing-step .listing-step-number {
+        width: 30px;
+        height: 30px;
+        min-width: 30px;
+        font-size: 12px;
+    }
+
+    .listing-step small {
+        font-size: 9px;
+    }
+}
+
+
+.listing-wizard-page {
+  display: none;
+  padding: 10px 5px;
+}
+
+.listing-wizard-page.active {
+  display: block;
+}
+
+.listing-wizard-page h2 {
+  font-size: 25px;
+  margin-bottom: 8px;
+}
+
+.listing-wizard-page > p {
+  color: #777;
+  margin-bottom: 28px;
+}
+
+.listing-wizard-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 30px;
+  padding-top: 22px;
+  border-top: 1px solid #e8ded6;
+}
+
+.listing-review-card {
+  margin: 20px 0;
+  padding: 18px;
+  border: 1px solid #e8ded6;
+  border-radius: 12px;
+  background: #faf7f3;
+}
+
+.listing-review-card p {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 10px 0;
+  margin: 0;
+  border-bottom: 1px solid #e8ded6;
+}
+
+.listing-review-card p:last-child {
+  border-bottom: none;
+}
+
+@media (max-width: 600px) {
+  .listing-stepper {
+    gap: 2px;
+    padding: 15px 5px;
+  }
+
+  .listing-step span {
+    width: 30px;
+    height: 30px;
+  }
+
+  .listing-step small {
+    font-size: 10px;
+  }
+
+  .listing-wizard-page h2 {
+    font-size: 21px;
+  }
+}
+
 @media (max-width: 900px) {
   .ld-stats { grid-template-columns: repeat(2, 1fr); }
   .ld-doc-grid { grid-template-columns: repeat(2, 1fr); }

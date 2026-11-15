@@ -33,6 +33,7 @@ class Listing(models.Model):
     description = models.TextField(blank=True)
     room_type = models.CharField(max_length=20, choices=ROOM_TYPE_CHOICES, default='single')
     location = models.CharField(max_length=200, help_text='e.g. Kathmandu, Lalitpur')
+    city_vdc = models.CharField(max_length=150, blank=True, default='')
     province = models.CharField(max_length=20, choices=PROVINCE_CHOICES, default='Bagmati')
     district = models.CharField(max_length=100, blank=True)
     ward_number = models.CharField(max_length=10, blank=True)

@@ -81,40 +81,178 @@
   </section>
 
   {# ---------------- Add Listing ---------------- #}
-  <section class="ld-panel{% if active_tab == 'add' %} is-active{% endif %}" data-panel="add">
-    <form method="post" action="{% url 'core:landlord_add_listing' %}" enctype="multipart/form-data" class="ld-form" novalidate>
-      {% csrf_token %}
-      {% if file_errors or listing_form.errors or facility_form.errors %}
-        <div class="ld-alert">
-          <strong>Please fix the highlighted problems below.</strong>
-          {% for e in file_errors %}<div>{{ e }}</div>{% endfor %}
-        </div>
-      {% endif %}
+  
+<section class="ld-panel{% if active_tab == 'add' %} is-active{% endif %}" data-panel="add">
+  <form method="post"
+        action="{% url 'core:landlord_add_listing' %}"
+        enctype="multipart/form-data"
+        class="ld-form listing-wizard"
+        novalidate>
+    {% csrf_token %}
 
-      {% include 'core/_ld_listing_form_fields.html' %}
+    {% if file_errors or listing_form.errors or facility_form.errors %}
+      <div class="ld-alert">
+        <strong>Please fix the highlighted problems below.</strong>
+        {% for e in file_errors %}<div>{{ e }}</div>{% endfor %}
+        {{ listing_form.non_field_errors }}
+        {{ facility_form.non_field_errors }}
+      </div>
+    {% endif %}
 
-      <h3 class="ld-form-heading">Photos <span class="ld-req">*</span></h3>
+    <div class="listing-stepper">
+      <div class="listing-step is-active" data-step="1">
+        <span class="listing-step-number">1</span>
+        <span class="listing-step-label">Basic Info</span>
+      </div>
+      <div class="listing-step" data-step="2">
+        <span class="listing-step-number">2</span>
+        <span class="listing-step-label">Location</span>
+      </div>
+      <div class="listing-step" data-step="3">
+        <span class="listing-step-number">3</span>
+        <span class="listing-step-label">Pricing</span>
+      </div>
+      <div class="listing-step" data-step="4">
+        <span class="listing-step-number">4</span>
+        <span class="listing-step-label">Facilities</span>
+      </div>
+      <div class="listing-step" data-step="5">
+        <span class="listing-step-number">5</span>
+        <span class="listing-step-label">Review</span>
+      </div>
+    </div>
+
+    <div class="listing-wizard-page" data-page="1">
+      <h2 class="listing-page-title">Basic Information</h2>
+      <div class="ld-grid">
+        {% include 'core/_ld_field.html' with field=listing_form.title wide=True %}
+        {% include 'core/_ld_field.html' with field=listing_form.room_type wide=True %}
+        {% include 'core/_ld_field.html' with field=listing_form.description wide=True %}
+      </div>
+      <div class="listing-wizard-actions">
+        <span></span>
+        <button type="button" class="listing-next" data-next>Next <span>›</span></button>
+      </div>
+    </div>
+
+    <div class="listing-wizard-page" data-page="2" hidden>
+      <h2 class="listing-page-title">Property Location</h2>
+      <div class="ld-grid">
+        {% include 'core/_ld_field.html' with field=listing_form.province %}
+        {% include 'core/_ld_field.html' with field=listing_form.district %}
+        {% include 'core/_ld_field.html' with field=listing_form.location %}
+        {% include 'core/_ld_field.html' with field=listing_form.ward_number %}
+        {% include 'core/_ld_field.html' with field=listing_form.exact_address wide=True %}
+      </div>
+      <div class="listing-wizard-actions">
+        <button type="button" class="listing-previous" data-back>‹ Previous</button>
+        <button type="button" class="listing-next" data-next>Next <span>›</span></button>
+      </div>
+    </div>
+
+    <div class="listing-wizard-page" data-page="3" hidden>
+      <h2 class="listing-page-title">Pricing & Availability</h2>
+      <div class="ld-grid">
+        {% include 'core/_ld_field.html' with field=listing_form.price %}
+        {% include 'core/_ld_field.html' with field=listing_form.security_deposit %}
+        {% include 'core/_ld_field.html' with field=listing_form.available_from %}
+      </div>
+      <h3 class="ld-form-heading">Utility bills</h3>
+      <div class="ld-checks">
+        {% include 'core/_ld_field.html' with field=listing_form.bills_water %}
+        {% include 'core/_ld_field.html' with field=listing_form.bills_electricity %}
+        {% include 'core/_ld_field.html' with field=listing_form.bills_internet %}
+      </div>
+      <div class="listing-wizard-actions">
+        <button type="button" class="listing-previous" data-back>‹ Previous</button>
+        <button type="button" class="listing-next" data-next>Next <span>›</span></button>
+      </div>
+    </div>
+
+    <div class="listing-wizard-page" data-page="4" hidden>
+      <h2 class="listing-page-title">Facilities & Rules</h2>
       <div class="ld-field ld-wide">
-        <input type="file" name="images" id="id_images" accept=".jpg,.jpeg,.png,.webp" multiple class="ld-input ld-file" />
+        <label for="{{ facility_form.furnished_status.id_for_label }}">Furnishing</label>
+        {{ facility_form.furnished_status }}
+        {{ facility_form.furnished_status.errors }}
+      </div>
+
+      <h3 class="ld-form-heading">Available facilities</h3>
+      <div class="ld-grid">
+        {% for field in facility_form.checkbox_fields %}
+          {% if field.name != 'furnished_status' %}
+            <div class="ld-field">
+              <label for="{{ field.id_for_label }}">{{ field }} {{ field.label }}</label>
+              {{ field.errors }}
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+
+      {% include 'core/_ld_field.html' with field=listing_form.house_rules wide=True %}
+
+      <div class="listing-wizard-actions">
+        <button type="button" class="listing-previous" data-back>‹ Previous</button>
+        <button type="button" class="listing-next" data-next>Next <span>›</span></button>
+      </div>
+    </div>
+
+    <div class="listing-wizard-page" data-page="5" hidden>
+      <h2 class="listing-page-title">Review Your Listing</h2>
+      <p class="listing-review-intro">Review your details and add photos before submitting your property.</p>
+
+      <div class="listing-review-card">
+        <h3>Basic Information</h3>
+        <p><strong>Title:</strong> <span data-review="title">—</span></p>
+        <p><strong>Property type:</strong> <span data-review="room_type">—</span></p>
+        <p><strong>Description:</strong> <span data-review="description">—</span></p>
+      </div>
+
+      <div class="listing-review-card">
+        <h3>Location</h3>
+        <p><strong>Province:</strong> <span data-review="province">—</span></p>
+        <p><strong>District:</strong> <span data-review="district">—</span></p>
+        <p><strong>Location:</strong> <span data-review="location">—</span></p>
+        <p><strong>Ward:</strong> <span data-review="ward_number">—</span></p>
+        <p><strong>Address:</strong> <span data-review="exact_address">—</span></p>
+      </div>
+
+      <div class="listing-review-card">
+        <h3>Pricing & Availability</h3>
+        <p><strong>Monthly price:</strong> NPR <span data-review="price">—</span></p>
+        <p><strong>Security deposit:</strong> <span data-review="security_deposit">—</span></p>
+        <p><strong>Available from:</strong> <span data-review="available_from">—</span></p>
+      </div>
+
+      <h3 class="ld-form-heading">Property photos <span class="ld-req">*</span></h3>
+      <div class="ld-field ld-wide">
+        <input type="file" name="images" id="id_images"
+               accept=".jpg,.jpeg,.png,.webp" multiple
+               class="ld-input ld-file" />
         <small>Up to {{ max_images }} photos, 5 MB each (JPG, PNG or WebP). The first one becomes the cover.</small>
       </div>
 
-      <h3 class="ld-form-heading">Verification documents <span class="ld-optional">optional now &middot; can be added later in the Documents tab</span></h3>
+      <h3 class="ld-form-heading">Verification documents
+        <span class="ld-optional">Optional now · can be added later in the Documents tab</span>
+      </h3>
       <div class="ld-grid">
         {% for code, label in doc_types %}
           <div class="ld-field">
             <label for="id_doc_{{ code }}">{{ label }}</label>
-            <input type="file" name="doc_{{ code }}" id="id_doc_{{ code }}" accept=".jpg,.jpeg,.png,.webp,.pdf" class="ld-input ld-file" />
+            <input type="file" name="doc_{{ code }}" id="id_doc_{{ code }}"
+                   accept=".jpg,.jpeg,.png,.webp,.pdf" class="ld-input ld-file" />
           </div>
         {% endfor %}
       </div>
 
-      <div class="ld-form-actions">
-        <button type="submit" class="btn btn-primary">Submit for approval</button>
-        <a href="?tab=listings" data-tab="listings" class="ld-btn ld-btn-edit">Cancel</a>
+      <div class="listing-wizard-actions">
+        <button type="button" class="listing-previous" data-back>‹ Previous</button>
+        <button type="submit" class="listing-next">Submit for approval</button>
       </div>
-    </form>
-  </section>
+    </div>
+  </form>
+</section>
+
 
   {# ---------------- Documents ---------------- #}
   <section class="ld-panel{% if active_tab == 'documents' %} is-active{% endif %}" data-panel="documents">
